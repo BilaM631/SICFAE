@@ -1,0 +1,133 @@
+{% extends 'candidaturas/base.html' %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col">
+        <h2 class="mb-3">Relatórios de Candidaturas</h2>
+        <p class="text-muted">Geração de listas e estatísticas para gestão do processo de candidaturas.</p>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- Relatórios Operacionais -->
+    <div class="col-md-6 col-lg-3">
+        <div class="card h-100 shadow-sm border-0">
+            <div class="card-body text-center">
+                <div class="mb-3">
+                    <span class="display-4">📋</span>
+                </div>
+                <h5 class="card-title">Lista Geral de Inscritos</h5>
+                <p class="card-text small text-muted">Todos os candidatos registados no sistema, ordenados
+                    alfabeticamente.</p>
+                <div class="d-grid gap-2">
+                    <a href="{% url 'candidaturas:relatorio_pdf' 'geral' %}" class="btn btn-primary" target="_blank">
+                        <i class="bi bi-file-earmark-pdf me-2"></i>PDF
+                    </a>
+                    <a href="{% url 'candidaturas:exportar_excel' 'geral' %}" class="btn btn-success">
+                        <i class="bi bi-file-earmark-excel me-2"></i>Excel
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6 col-lg-3">
+        <div class="card h-100 shadow-sm border-0">
+            <div class="card-body text-center">
+                <div class="mb-3">
+                    <span class="display-4">⏳</span>
+                </div>
+                <h5 class="card-title">Pendentes de Validação</h5>
+                <p class="card-text small text-muted">Candidatos que aguardam verificação de documentos pelos
+                    operadores.</p>
+                <div class="d-grid gap-2">
+                    <a href="{% url 'candidaturas:relatorio_pdf' 'pendentes' %}" class="btn btn-warning text-dark"
+                        target="_blank">
+                        <i class="bi bi-file-earmark-pdf me-2"></i>PDF
+                    </a>
+                    <a href="{% url 'candidaturas:exportar_excel' 'pendentes' %}" class="btn btn-success">
+                        <i class="bi bi-file-earmark-excel me-2"></i>Excel
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6 col-lg-3">
+        <div class="card h-100 shadow-sm border-0">
+            <div class="card-body text-center">
+                <div class="mb-3">
+                    <span class="display-4">🚫</span>
+                </div>
+                <h5 class="card-title">Candidatos Rejeitados</h5>
+                <p class="card-text small text-muted">Lista de candidaturas recusadas por problemas documentais.</p>
+                <div class="d-grid gap-2">
+                    <a href="{% url 'candidaturas:relatorio_pdf' 'rejeitados' %}" class="btn btn-danger"
+                        target="_blank">
+                        <i class="bi bi-file-earmark-pdf me-2"></i>PDF
+                    </a>
+                    <a href="{% url 'candidaturas:exportar_excel' 'rejeitados' %}" class="btn btn-success">
+                        <i class="bi bi-file-earmark-excel me-2"></i>Excel
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6 col-lg-3">
+        <div class="card h-100 shadow-sm border-0">
+            <div class="card-body text-center">
+                <div class="mb-3">
+                    <span class="display-4">📊</span>
+                </div>
+                <h5 class="card-title">Resumo Estatístico</h5>
+                <p class="card-text small text-muted">Totais de inscritos vs. vagas, distribuição por género e estado.
+                </p>
+                <a href="{% url 'candidaturas:relatorio_pdf' 'estatisticas' %}" class="btn btn-info w-100 text-white"
+                    target="_blank">
+                    <i class="bi bi-file-earmark-pdf me-2"></i>Gerar Resumo
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if user.is_superuser %}
+<div class="row g-4 mt-2">
+    <div class="col-12">
+        <h5 class="text-secondary border-bottom pb-2">Área de Auditoria (Superusuário)</h5>
+    </div>
+    <div class="col-md-6 col-lg-3">
+        <div class="card h-100 shadow-sm border-0 border-top border-5 border-dark">
+            <div class="card-body text-center">
+                <div class="mb-3">
+                    <span class="display-4">🛡️</span>
+                </div>
+                <h5 class="card-title">Auditoria do Sistema</h5>
+                <p class="card-text small text-muted">Histórico completo de alterações e acessos sensíveis no sistema.
+                </p>
+                <div class="d-grid gap-2">
+                    <a href="{% url 'candidaturas:relatorio_pdf' 'auditoria' %}" class="btn btn-dark" target="_blank">
+                        <i class="bi bi-shield-lock me-2"></i>Log PDF
+                    </a>
+                    <a href="{% url 'candidaturas:exportar_excel' 'auditoria' %}" class="btn btn-success">
+                        <i class="bi bi-table me-2"></i>Log Excel
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<div class="row mt-5">
+    <div class="col-12">
+        <div class="alert alert-light border">
+            <h6><i class="bi bi-info-circle me-2"></i>Nota Informativa</h6>
+            Os relatórios são gerados com base na sua área de jurisdição (Distrito/Província).
+            Se for administrador Provincial ou Central, os dados incluirão todos os sub-níveis correspondentes.
+        </div>
+    </div>
+</div>
+
+{% endblock %}

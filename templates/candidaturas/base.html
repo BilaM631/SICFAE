@@ -1,0 +1,333 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SICFAAE - Gestão de Candidaturas</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+
+    <style>
+        :root {
+            /* Branding Colors based on Flyer (STAE Theme) */
+            --stae-orange: #C25E00;
+            /* Deep / Burnt Orange */
+            --stae-green: #198754;
+            /* Standard Success Green */
+            --stae-gold: #FFD700;
+            /* Gold Highlight */
+
+            --primary-color: var(--stae-orange);
+            --primary-hover: #A04000;
+            --sidebar-width: 260px;
+
+            /* Bootstrap Overrides (Globally applies STAE Orange) */
+            --bs-primary: var(--stae-orange);
+            --bs-primary-rgb: 194, 94, 0;
+            --bs-link-color: var(--stae-orange);
+            --bs-link-hover-color: #A04000;
+        }
+
+        body {
+            background-color: #f3f4f6;
+            overflow-x: hidden;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        /* --- AUTHENTICATED LAYOUT PRESETS --- */
+        #wrapper {
+            display: flex;
+            width: 100%;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        #sidebar-wrapper {
+            min-width: var(--sidebar-width);
+            max-width: var(--sidebar-width);
+            background-color: var(--primary-color);
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            transition: all 0.3s ease;
+            box-shadow: 4px 0 10px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+        }
+
+        .sidebar-heading {
+            padding: 1.5rem;
+            font-size: 1.5rem;
+            font-weight: bold;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .sidebar-menu {
+            padding-top: 1rem;
+            flex-grow: 1;
+            overflow-y: auto;
+        }
+
+        .sidebar-menu .nav-link {
+            color: rgba(255, 255, 255, 0.85);
+            padding: 0.8rem 1.5rem;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: all 0.2s;
+            border-left: 4px solid transparent;
+        }
+
+        .sidebar-menu .nav-link:hover {
+            color: #fff;
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .sidebar-menu .nav-link.active {
+            color: #fff;
+            background-color: rgba(255, 255, 255, 0.15);
+            border-left-color: var(--stae-gold);
+            font-weight: 600;
+        }
+
+        .sidebar-footer {
+            padding: 1rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            background-color: rgba(0, 0, 0, 0.1);
+        }
+
+        #page-content-wrapper {
+            width: 100%;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .content-container {
+            padding: 2rem;
+            flex-grow: 1;
+        }
+
+        /* --- PUBLIC LAYOUT PRESETS --- */
+        body.public-layout .navbar-public {
+            background-color: #fff !important;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        body.public-layout .container {
+            margin-top: 2rem;
+        }
+
+        .navbar {
+            padding: 0.8rem 1.5rem;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-hover);
+        }
+
+        @media (max-width: 768px) {
+            #sidebar-wrapper {
+                margin-left: calc(-1 * var(--sidebar-width));
+                position: fixed;
+                height: 100%;
+            }
+
+            #wrapper.toggled #sidebar-wrapper {
+                margin-left: 0;
+            }
+
+            .overlay {
+                display: none;
+                position: fixed;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.5);
+                z-index: 999;
+            }
+
+            #wrapper.toggled .overlay {
+                display: block;
+            }
+        }
+    </style>
+    {% block extra_css %}{% endblock %}
+</head>
+
+<body class="{% if not user.is_authenticated %}public-layout{% endif %}">
+
+    {% if user.is_authenticated %}
+    <div id="wrapper">
+        <div class="overlay" id="sidebar-overlay"></div>
+        <nav id="sidebar-wrapper">
+            <div class="sidebar-heading">
+                <i class="bi bi-shield-check"></i> SICFAAE
+            </div>
+            <div class="sidebar-menu nav flex-column">
+                <div class="small fw-bold text-uppercase px-4 mb-2 mt-2 text-white-50" style="font-size: 0.75rem;">Menu
+                    Principal</div>
+
+                <a href="{% url 'candidaturas:inicio' %}"
+                    class="nav-link {% if request.resolver_match.url_name == 'inicio' %}active{% endif %}">
+                    <i class="bi bi-house-door"></i> Início
+                </a>
+                <a href="{% url 'candidaturas:painel_controlo' %}"
+                    class="nav-link {% if request.resolver_match.url_name == 'painel_controlo' %}active{% endif %}">
+                    <i class="bi bi-speedometer2"></i> Dashboard
+                </a>
+                <a href="{% url 'candidaturas:lista_verificacao' %}"
+                    class="nav-link {% if request.resolver_match.url_name == 'lista_verificacao' %}active{% endif %}">
+                    <i class="bi bi-people"></i> Lista de Candidatos
+                </a>
+                <a href="{% url 'candidaturas:registar_candidatura_manual' %}"
+                    class="nav-link {% if request.resolver_match.url_name == 'registar_candidatura_manual' %}active{% endif %}">
+                    <i class="bi bi-person-plus"></i> Registo Manual
+                </a>
+                <a href="{% url 'candidaturas:relatorios' %}"
+                    class="nav-link {% if request.resolver_match.url_name == 'relatorios' %}active{% endif %}">
+                    <i class="bi bi-file-earmark-text"></i> Relatórios
+                </a>
+
+                {% if user.is_superuser or user.perfil.nivel == 'CENTRAL' or user.perfil.nivel == 'PROVINCIAL' %}
+                <div class="small fw-bold text-uppercase px-4 mb-2 mt-3 text-white-50" style="font-size: 0.75rem;">
+                    Administração</div>
+                <a href="/admin/candidaturas/vaga/" target="_blank" class="nav-link">
+                    <i class="bi bi-briefcase"></i> Gerir Vagas
+                </a>
+                <a href="{% url 'candidaturas:gestao_utilizadores' %}"
+                    class="nav-link {% if request.resolver_match.url_name == 'gestao_utilizadores' %}active{% endif %}">
+                    <i class="bi bi-person-gear"></i> Utilizadores
+                </a>
+
+                {% if user.is_superuser %}
+                <a href="/admin/" target="_blank" class="nav-link">
+                    <i class="bi bi-database-gear"></i> Django Admin
+                </a>
+                {% endif %}
+                {% endif %}
+            </div>
+
+            <div class="sidebar-footer">
+                <div class="d-flex align-items-center mb-2">
+                    <div class="flex-grow-1 text-truncate">
+                        <div class="fw-bold">{{ user.first_name|default:user.username }}</div>
+                        <div class="small text-white-50" style="font-size: 0.8rem;">
+                            {{ user.perfil.get_nivel_display|default:'Utilizador' }}
+                        </div>
+                    </div>
+                </div>
+                <form action="{% url 'logout' %}" method="post">
+                    {% csrf_token %}
+                    <button type="submit"
+                        class="btn btn-danger btn-sm w-100 d-flex align-items-center justify-content-center gap-2">
+                        <i class="bi bi-box-arrow-right"></i> Sair
+                    </button>
+                </form>
+            </div>
+        </nav>
+
+        <div id="page-content-wrapper">
+            <nav class="navbar navbar-expand-lg border-bottom sticky-top bg-white">
+                <div class="container-fluid">
+                    <button class="btn btn-outline-secondary d-md-none me-3" id="menu-toggle">
+                        <i class="bi bi-list"></i>
+                    </button>
+                    <h5 class="mb-0 text-secondary fw-bold d-none d-md-block">Sistema de Gestão de Candidaturas</h5>
+                    <div class="ms-auto d-flex align-items-center gap-3">
+                        <button class="btn btn-link text-secondary p-0" id="bd-theme-toggle" title="Alternar Tema">
+                            <i id="theme-icon" class="bi bi-moon fs-5"></i>
+                        </button>
+                    </div>
+                </div>
+            </nav>
+            <div class="content-container">
+                <div class="container-fluid">
+                    {% else %}
+                    <nav class="navbar navbar-expand-lg navbar-dark bg-white shadow-sm mb-4 navbar-public">
+                        <div class="container">
+                            <a href="{% url 'candidaturas:inicio' %}" class="navbar-brand d-flex align-items-center">
+                                <h1 class="m-0 text-primary display-5 fw-bold"><i class="bi bi-book me-3"></i>SICFAAE
+                                </h1>
+                            </a>
+                            <div class="navbar-nav ms-auto d-flex flex-row gap-3">
+                                <button class="btn btn-link nav-link px-3 text-dark" id="bd-theme-toggle-public"
+                                    title="Alternar Tema">
+                                    <i id="theme-icon-public" class="bi bi-moon fs-5"></i>
+                                </button>
+                                <a class="nav-link text-primary fw-bold" href="{% url 'login' %}">
+                                    <i class="bi bi-box-arrow-in-right"></i> Login Staff
+                                </a>
+                            </div>
+                        </div>
+                    </nav>
+                    <div class="container mb-5">
+                        {% endif %}
+
+                        {% if messages %}
+                        {% for message in messages %}
+                        <div
+                            class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show shadow-sm">
+                            <i class="bi bi-info-circle me-2"></i> {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                        {% endfor %}
+                        {% endif %}
+
+                        {% block content %}{% endblock %}
+
+                        {% if user.is_authenticated %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% else %}
+    </div>
+    {% endif %}
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const wrapper = document.getElementById('wrapper');
+        const toggleButton = document.getElementById('menu-toggle');
+        const overlay = document.getElementById('sidebar-overlay');
+        if (toggleButton) toggleButton.addEventListener('click', () => wrapper.classList.toggle('toggled'));
+        if (overlay) overlay.addEventListener('click', () => wrapper.classList.remove('toggled'));
+
+        const themeBtn = document.getElementById('bd-theme-toggle') || document.getElementById('bd-theme-toggle-public');
+        const themeIcon = document.getElementById('theme-icon') || document.getElementById('theme-icon-public');
+        const htmlElement = document.documentElement;
+
+        function setTheme(theme) {
+            htmlElement.setAttribute('data-bs-theme', theme);
+            localStorage.setItem('theme', theme);
+            if (themeIcon) {
+                themeIcon.className = theme === 'dark' ? 'bi bi-sun fs-5' : 'bi bi-moon fs-5';
+                document.querySelectorAll('.bg-white').forEach(el => {
+                    if (theme === 'dark') {
+                        el.classList.replace('bg-white', 'bg-dark');
+                        el.classList.add('border-secondary');
+                    } else {
+                        el.classList.replace('bg-dark', 'bg-white');
+                        el.classList.remove('border-secondary');
+                    }
+                });
+            }
+        }
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        setTheme(savedTheme);
+        if (themeBtn) themeBtn.addEventListener('click', () => setTheme(htmlElement.getAttribute('data-bs-theme') === 'dark' ? 'light' : 'dark'));
+    </script>
+    {% block extra_js %}{% endblock %}
+</body>
+
+</html>

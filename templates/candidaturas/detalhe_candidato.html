@@ -1,0 +1,259 @@
+{% extends 'candidaturas/base.html' %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="card shadow">
+            <div class="card-header bg-white">
+                <h4>Detalhes do Candidato</h4>
+            </div>
+
+            <div class="card-body">
+
+                <ul class="nav nav-tabs mb-4" id="myTab" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="home-tab" data-bs-toggle="tab" data-bs-target="#home"
+                            type="button" role="tab">Visão Geral</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="docs-tab" data-bs-toggle="tab" data-bs-target="#docs" type="button"
+                            role="tab">✅ Validação Documental</button>
+                    </li>
+                </ul>
+
+                <div class="tab-content" id="myTabContent">
+                    <div class="tab-pane fade show active" id="home" role="tabpanel">
+                        <div class="row mb-3">
+                            <div class="col-md-4 text-center">
+
+                                {% if candidato.foto %}
+                                <div class="ratio ratio-1x1 mb-3">
+                                    <img src="{{ candidato.foto.url }}"
+                                        class="img-fluid rounded shadow-sm object-fit-cover" alt="Foto do Candidato"
+                                        style="object-fit: cover;">
+                                </div>
+                                {% else %}
+                                <div
+                                    class="ratio ratio-1x1 mb-3 bg-light d-flex align-items-center justify-content-center rounded border">
+                                    <span class="text-muted display-4">👤</span>
+                                </div>
+                                <p class="text-muted small">Sem Foto</p>
+                                {% endif %}
+
+                            </div>
+
+                            <div class="col-md-8">
+                                <h5>{{ candidato.nome_completo }}</h5>
+
+                                <p>
+                                    <strong>Vaga:</strong>
+                                    <span class="badge bg-secondary">{{ candidato.get_funcao_display }}</span>
+                                </p>
+
+                                <p><strong>BI:</strong> {{ candidato.numero_bi }}</p>
+                                <p><strong>Telefone:</strong> {{ candidato.numero_telefone }}</p>
+                                <p><strong>Localização:</strong> {{ candidato.provincia }}, {{ candidato.distrito }}</p>
+                                <p><strong>Endereço:</strong> {{ candidato.endereco }}</p>
+
+                                <p>
+                                    <strong>Estado:</strong>
+                                    <span class="badge bg-info">{{ candidato.get_estado_display }}</span>
+                                </p>
+                            </div>
+                        </div>
+
+                        <hr>
+
+                        <h5 class="mb-3">Documentos (Uploads)</h5>
+
+                        <div class="list-group mb-4">
+
+                            {% if candidato.arquivo_cv %}
+                            <a href="{{ candidato.arquivo_cv.url }}" target="_blank"
+                                class="list-group-item list-group-item-action">
+                                📄 Visualizar Curriculum Vitae (CV)
+                            </a>
+                            {% else %}
+                            <div class="list-group-item text-danger">CV em falta</div>
+                            {% endif %}
+
+                            {% if candidato.arquivo_bi %}
+                            <a href="{{ candidato.arquivo_bi.url }}" target="_blank"
+                                class="list-group-item list-group-item-action">
+                                🪪 Visualizar Cópia do BI
+                            </a>
+                            {% else %}
+                            <div class="list-group-item text-danger">BI em falta</div>
+                            {% endif %}
+
+                            {% if candidato.arquivo_certificado %}
+                            <a href="{{ candidato.arquivo_certificado.url }}" target="_blank"
+                                class="list-group-item list-group-item-action">
+                                🎓 Visualizar Certificado
+                            </a>
+                            {% else %}
+                            <div class="list-group-item text-warning">Certificado em falta</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="d-grid gap-2">
+
+                            {% if pode_gerir %}
+                            {# --- BOTÕES DE AÇÃO --- #}
+
+                            {% if candidato.estado == 'PENDENTE' %}
+                            <a href="{% url 'candidaturas:verificar_candidato' candidato.pk 'aprovar' %}"
+                                class="btn btn-success btn-lg">
+                                ✅ Aprovar Documentos e Gerar Ficha
+                            </a>
+
+                            <a href="{% url 'candidaturas:verificar_candidato' candidato.pk 'rejeitar' %}"
+                                class="btn btn-danger">
+                                ❌ Rejeitar Documentos
+                            </a>
+                            {% endif %}
+
+                            {% if candidato.estado == 'DOCS_APROVADOS' %}
+                            <div class="alert alert-success d-flex align-items-center">
+                                <div class="flex-grow-1">
+                                    <h5 class="alert-heading mb-1">✅ Documentos Aprovados!</h5>
+                                    <p class="mb-0">A ficha do candidato foi gerada com sucesso.</p>
+                                </div>
+                            </div>
+
+                            <a href="{% url 'candidaturas:gerar_pdf' candidato.pk %}"
+                                class="btn btn-outline-dark btn-lg mb-3 w-100">
+                                📄 Baixar Ficha STAE (PDF)
+                            </a>
+
+                            <a href="{% url 'candidaturas:enviar_sms' candidato.pk %}" class="btn btn-success btn-lg">
+                                📲 Enviar WhatsApp Convite Entrevista
+                            </a>
+                            {% endif %}
+
+                            {% if candidato.estado == 'ENTREVISTA_AGENDADA' %}
+                            <div class="alert alert-info">
+                                Entrevista agendada (SMS Enviado). Candidato aguarda entrevista.
+                            </div>
+
+                            <div class="btn-group">
+                                <a href="{% url 'candidaturas:registar_entrevista' candidato.pk 'passou' %}"
+                                    class="btn btn-success">
+                                    🎓 Aprovar na Entrevista
+                                </a>
+
+                                <a href="{% url 'candidaturas:registar_entrevista' candidato.pk 'reprovou' %}"
+                                    class="btn btn-danger">
+                                    🚫 Reprovar na Entrevista
+                                </a>
+                            </div>
+                            {% endif %}
+
+                            {% if candidato.estado == 'ENTREVISTA_APROVADA' %}
+                            <div class="alert alert-success">
+                                Candidato Aprovado na Entrevista!
+                            </div>
+                            {% endif %}
+
+                            {% if candidato.estado == 'CONTRATADO' %}
+                            <div class="alert alert-success">
+                                <strong>Processo Finalizado!</strong><br>
+                                Credenciais enviadas/geradas.
+                            </div>
+                            {% endif %}
+
+                            {% else %}
+                            <div class="alert alert-warning">
+                                <i class="me-2">🔒</i>Modo de Visualização: Apenas o nível Distrital pode gerir
+                                candidaturas.
+                            </div>
+                            {% endif %}
+
+                        </div>
+                    </div>
+
+                    <div class="tab-pane fade" id="docs" role="tabpanel">
+                        <div class="alert alert-light border">
+                            <i class="me-2">ℹ️</i>
+                            Utilize esta lista para validar a receção e conformidade dos documentos físicos.
+                        </div>
+
+                        <form action="{% url 'candidaturas:validar_documentos' candidato.pk %}" method="post">
+                            {% csrf_token %}
+                            <div class="card border-0 bg-light p-3">
+                                <h6 class="fw-bold mb-3">Checklist de Conformidade</h6>
+
+                                <div class="form-check mb-2">
+                                    <input type="checkbox" name="validacao_bi" class="form-check-input"
+                                        id="id_validacao_bi" {% if candidato.validacao_bi %}checked{% endif %}>
+                                    <label class="form-check-label" for="id_validacao_bi">Bilhete de Identidade (Válido)</label>
+                                </div>
+
+                                <div class="form-check mb-2">
+                                    <input type="checkbox" name="validacao_cv" class="form-check-input"
+                                        id="id_validacao_cv" {% if candidato.validacao_cv %}checked{% endif %}>
+                                    <label class="form-check-label" for="id_validacao_cv">Curriculum Vitae (CV)</label>
+                                </div>
+
+                                <div class="form-check mb-2">
+                                    <input type="checkbox" name="validacao_certificado" class="form-check-input"
+                                        id="id_validacao_certificado" {% if candidato.validacao_certificado %}checked{% endif %}>
+                                    <label class="form-check-label" for="id_validacao_certificado">Certificado de Habilitações</label>
+                                </div>
+
+                                <hr>
+
+                                <div class="form-check mb-2">
+                                    <input type="checkbox" name="validacao_nuit" class="form-check-input"
+                                        id="id_validacao_nuit" {% if candidato.validacao_nuit %}checked{% endif %}>
+                                    <label class="form-check-label" for="id_validacao_nuit">NUIT</label>
+                                </div>
+
+                                <div class="form-check mb-2">
+                                    <input type="checkbox" name="validacao_registo_criminal" class="form-check-input"
+                                        id="id_validacao_registo_criminal" {% if candidato.validacao_registo_criminal %}checked{% endif %}>
+                                    <label class="form-check-label" for="id_validacao_registo_criminal">Registo Criminal</label>
+                                </div>
+
+                                <div class="form-check mb-2">
+                                    <input type="checkbox" name="validacao_atestado_medico" class="form-check-input"
+                                        id="id_validacao_atestado_medico" {% if candidato.validacao_atestado_medico %}checked{% endif %}>
+                                    <label class="form-check-label" for="id_validacao_atestado_medico">Atestado Médico</label>
+                                </div>
+
+                                <div class="form-check mb-2">
+                                    <input type="checkbox" name="validacao_requerimento" class="form-check-input"
+                                        id="id_validacao_requerimento" {% if candidato.validacao_requerimento %}checked{% endif %}>
+                                    <label class="form-check-label" for="id_validacao_requerimento">Requerimento Assinado</label>
+                                </div>
+
+                                <div class="mt-4 text-end">
+                                    <button type="submit" class="btn btn-primary">
+                                        💾 Salvar Checklist
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('tab') === 'docs') {
+            const triggerEl = document.querySelector('#docs-tab');
+            if (triggerEl) {
+                const tab = new bootstrap.Tab(triggerEl);
+                tab.show();
+            }
+        }
+    });
+</script>
+{% endblock %}

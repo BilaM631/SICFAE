@@ -1,0 +1,18 @@
+{% extends 'candidaturas/base.html' %}
+
+{% block content %}
+<div class="row justify-content-center mt-5">
+    <div class="col-md-6 text-center">
+        <div class="card shadow p-5 border-success">
+            <div class="mb-4">
+                <span style="font-size: 5rem;">✅</span>
+            </div>
+            <h2 class="text-success">Candidatura Submetida!</h2>
+            <p class="lead mt-3">Os seus dados foram recebidos com sucesso.</p>
+            <p>Iremos analisar a sua documentação e entraremos em contacto brevemente via SMS.</p>
+
+            <a href="{% url 'candidaturas:inicio' %}" class="btn btn-outline-success mt-4">Voltar à Página Inicial</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

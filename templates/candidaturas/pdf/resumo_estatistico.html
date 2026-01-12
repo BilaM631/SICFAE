@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="pt">
+
+<head>
+    <meta charset="UTF-8">
+    <title>{{ titulo }}</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            font-size: 14px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #000;
+            padding-bottom: 15px;
+        }
+
+        .header h1 {
+            font-size: 20px;
+            margin: 0;
+            text-transform: uppercase;
+        }
+
+        .meta {
+            margin-bottom: 30px;
+        }
+
+        .section {
+            margin-bottom: 30px;
+        }
+
+        h3 {
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 5px;
+            color: #333;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        th,
+        td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f8f9fa;
+        }
+
+        .highlight {
+            font-weight: bold;
+            color: #000;
+        }
+
+        .footer {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            text-align: center;
+            font-size: 10px;
+            color: #999;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="header">
+        <h1>Secretariado Técnico de Administração Eleitoral</h1>
+        <h2>{{ titulo }}</h2>
+    </div>
+
+    <div class="meta">
+        <strong>Área de Abrangência:</strong> {{ area_nome }} <br>
+        <strong>Data do Relatório:</strong> {% now "d/m/Y H:i" %}
+    </div>
+
+    <div class="section">
+        <h3>Totais Gerais</h3>
+        <p>Total de Candidaturas no Sistema: <span class="highlight" style="font-size: 18px;">{{ stats_total }}</span>
+        </p>
+    </div>
+
+    <div class="section">
+        <h3>Distribuição por Vaga (Cargo)</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Cargo</th>
+                    <th>Quantidade</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in stats_role %}
+                <tr>
+                    <td>{{ item.label }}</td>
+                    <td>{{ item.count }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="section">
+        <h3>Estado das Candidaturas (Progresso)</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Estado</th>
+                    <th>Quantidade</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in stats_status %}
+                <tr>
+                    <td>{{ item.label }}</td>
+                    <td>{{ item.count }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="footer">
+        Gerado automaticamente pelo SICFAAE
+    </div>
+</body>
+
+</html>

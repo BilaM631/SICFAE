@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <style>
+        body {
+            font-family: sans-serif;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid black;
+            padding-bottom: 10px;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .title {
+            font-size: 18px;
+            margin-top: 20px;
+            text-decoration: underline;
+        }
+
+        .content {
+            margin-top: 20px;
+            font-size: 14px;
+        }
+
+        .field {
+            margin-bottom: 10px;
+        }
+
+        .label {
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="header">
+        <div class="logo">REPÚBLICA DE MOÇAMBIQUE</div>
+        <div>{{ cabecalho_stae }}</div>
+        <div class="title">FICHA DE CANDIDATURA - AGENTE ELEITORAL</div>
+    </div>
+
+    <div class="content">
+        <div style="text-align: right;">
+            {% if candidato.foto %}
+            <img src="{{ candidato.foto.url }}" style="height: 120px; width: 120px;" />
+            {% endif %}
+        </div>
+        <div class="field">
+            <span class="label">Vaga a Candidatar:</span> {{ candidato.get_funcao_display }}
+        </div>
+        <div class="field">
+            <span class="label">Nome Completo:</span> {{ candidato.nome_completo }}
+        </div>
+        <div class="field">
+            <span class="label">Número de BI:</span> {{ candidato.numero_bi }}
+        </div>
+        <div class="field">
+            <span class="label">Contacto:</span> {{ candidato.numero_telefone }}
+        </div>
+        <div class="field">
+            <span class="label">Província:</span> {{ candidato.provincia }} | <span class="label">Distrito:</span> {{
+            candidato.distrito }}
+        </div>
+        <div class="field">
+            <span class="label">Endereço:</span> {{ candidato.endereco }}
+        </div>
+
+        <br><br>
+        <div class="field">
+            <span class="label">Estado da Verificação Documental:</span> APROVADO
+        </div>
+        <div class="field">
+            <span class="label">Data de Emissão:</span> {{ data|date:"d/m/Y H:i" }}
+        </div>
+
+        <br><br><br><br>
+        <div style="text-align: center;">
+            _____________________________________<br>
+            Assinatura do Responsável (Júri)
+        </div>
+    </div>
+</body>
+
+</html>

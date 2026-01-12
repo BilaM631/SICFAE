@@ -1,0 +1,27 @@
+{% extends 'candidaturas/base.html' %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-6 offset-md-3">
+        <div class="card shadow border-success">
+            <div class="card-header bg-success text-white">
+                <h4>Credenciais Geradas com Sucesso</h4>
+            </div>
+            <div class="card-body text-center">
+                <h5 class="card-title">Candidato: {{ candidate.full_name }}</h5>
+                <p class="card-text">Por favor, entregue ou envie estas credenciais ao candidato.</p>
+
+                <div class="alert alert-secondary p-4">
+                    <h3>Usuário: <strong>{{ username }}</strong></h3>
+                    <h3>Senha: <strong>{{ password }}</strong></h3>
+                </div>
+
+                <p class="text-danger"><small>Esta senha só será mostrada uma vez. Anote-a com segurança.</small></p>
+
+                <a href="{% url 'candidaturas:detalhe_candidato' candidate.pk %}" class="btn btn-primary">Voltar ao
+                    Candidato</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

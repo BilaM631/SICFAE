@@ -1,0 +1,389 @@
+{% extends 'candidaturas/base.html' %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12 d-flex justify-content-between align-items-center">
+        <div>
+            <h2 class="fw-bold text-dark">Painel de Controlo</h2>
+            <p class="text-secondary mb-2">Visão geral das candidaturas.</p>
+            {% if nivel_usuario %}
+            <span class="badge bg-primary bg-opacity-10 text-primary px-3 py-2">
+                🏛️ {{ nivel_usuario }}
+            </span>
+            {% endif %}
+        </div>
+        <!-- Ações removidas (movidas para menu lateral) -->
+    </div>
+</div>
+
+<!-- ================= RESUMO ================= -->
+{% if eh_central %}
+<div class="col-md-8 mb-3">
+    <div class="card border-0 shadow-sm h-100">
+        <div class="card-body p-4">
+            <h6 class="text-uppercase text-secondary fw-bold mb-3">Distribuição Geográfica</h6>
+            <div id="map" style="height: 350px; width: 100%; border-radius: 8px;"></div>
+        </div>
+    </div>
+</div>
+{% endif %}
+</div>
+
+<!-- ================= RESUMO (CARDS) ================= -->
+<div class="row mb-4">
+    <div class="col-md-4 mb-3">
+        <div class="card border-0 shadow-sm h-100 bg-primary text-white">
+            <div class="card-body p-4">
+                <h6 class="text-uppercase opacity-75 mb-2">Total Geral</h6>
+                <h1 class="display-4 fw-bold mb-0">{{ total_candidatos }}</h1>
+                <small class="opacity-75">Candidatos Registados</small>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-8 mb-3">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body p-4">
+                <h6 class="text-uppercase text-success fw-bold">Total Admitidos</h6>
+                <div class="row">
+                    <div class="col-md-4">
+                        <h1 class="display-4 fw-bold text-success">{{ total_admitidos }}</h1>
+                    </div>
+                    <div class="col-md-4">
+                        <strong>👨 Masculino</strong>
+                        <div class="fs-4">{{ admitidos_homens }}</div>
+                    </div>
+                    <div class="col-md-4">
+                        <strong>👩 Feminino</strong>
+                        <div class="fs-4">{{ admitidos_mulheres }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ================= GRÁFICOS (Fase 5 - Enterprise) ================= -->
+<div class="row mb-4">
+    <div class="col-md-6 mb-3">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <h6 class="text-uppercase text-secondary fw-bold mb-3">Estado das Candidaturas</h6>
+                <canvas id="statusChart"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 mb-3">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <h6 class="text-uppercase text-secondary fw-bold mb-3">Candidatos por Vaga</h6>
+                <canvas id="roleChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ================= ESTATÍSTICAS POR VAGA ================= -->
+<div class="row mb-5">
+    <h5 class="fw-bold text-secondary mb-3">Candidatos por Vaga</h5>
+    {% for item in stats_funcao %}
+    <div class="col-md-4 mb-2">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body d-flex justify-content-between align-items-center">
+                <span class="fw-bold text-dark">
+                    {{ item.label }}
+                </span>
+                <span class="badge bg-secondary rounded-pill fs-6">{{ item.count }}</span>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="col-12">
+        <p class="text-muted">Sem dados de vagas.</p>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- ================= TABELA / LISTA ================= -->
+{% if eh_central or eh_provincial %}
+<div class="row mb-4">
+    <div class="col-12 text-end">
+        <a href="{% url 'candidaturas:lista_verificacao' %}" class="btn btn-primary">
+            <i class="fs-5 me-2">🔍</i>
+            {% if eh_central %}
+            Consultar Lista Geral
+            {% else %}
+            Verificar Candidaturas
+            {% endif %}
+        </a>
+    </div>
+</div>
+<div class="card border-0 shadow-sm">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="bg-light">
+                <tr>
+                    <th class="ps-4">
+                        {% if eh_central %}Província{% else %}Distrito{% endif %}
+                    </th>
+                    <th class="text-center">Total</th>
+                    <th class="text-center">Admitidos</th>
+                    <th class="text-end pe-4">Ação</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if eh_central %}
+                {% for p in detalhes_provincia %}
+                <tr>
+                    <td class="ps-4 fw-bold">{{ p.nome }}</td>
+                    <td class="text-center">{{ p.total }}</td>
+                    <td class="text-center text-success fw-bold">{{ p.admitted_total }}</td>
+                    <td class="text-end pe-4">
+                        <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal"
+                            data-bs-target="#modalStat{{ p.id }}">
+                            Ver Detalhes
+                        </button>
+                    </td>
+                </tr>
+                {% endfor %}
+                {% else %}
+                {% for d in detalhes_distrito %}
+                <tr>
+                    <td class="ps-4 fw-bold">{{ d.nome }}</td>
+                    <td class="text-center">{{ d.total }}</td>
+                    <td class="text-center text-success fw-bold">{{ d.admitted_total }}</td>
+                    <td class="text-end pe-4">
+                        <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal"
+                            data-bs-target="#modalStat{{ d.id }}">
+                            Ver Detalhes
+                        </button>
+                    </td>
+                </tr>
+                {% endfor %}
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- ================= MODAIS ================= -->
+
+{% if eh_central %}
+{% for p in detalhes_provincia %}
+<div class="modal fade" id="modalStat{{ p.id }}" tabindex="-1" v-pre>
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold">Detalhes: {{ p.nome }}</h5>
+                <button class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+                <div class="row mb-4">
+
+                    <div class="col-md-6">
+                        <div class="card bg-light border-0">
+                            <div class="card-body">
+                                <h6 class="text-uppercase text-muted">Geral</h6>
+                                <p>Total: <strong>{{ p.total }}</strong></p>
+                                <p>{{ p.admitted_total }} Admitidos | {{ p.not_admitted_total }} Não Admitidos</p>
+                                <hr>
+                                <p>Masculino: <strong>{{ p.gender_general.m }}</strong></p>
+                                <p>Feminino: <strong>{{ p.gender_general.f }}</strong></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="card bg-success bg-opacity-10 border-0">
+                            <div class="card-body">
+                                <h6 class="text-uppercase text-success">Admitidos</h6>
+                                <p>Total: <strong class="text-success">{{ p.admitted_total }}</strong></p>
+                                <hr>
+                                <p>Masculino: <strong>{{ p.gender_admitted.m }}</strong></p>
+                                <p>Feminino: <strong>{{ p.gender_admitted.f }}</strong></p>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endfor %}
+{% endif %}
+
+{% if eh_provincial %}
+{% for d in detalhes_distrito %}
+<div class="modal fade" id="modalStat{{ d.id }}" tabindex="-1" v-pre>
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold">Detalhes: {{ d.nome }}</h5>
+                <button class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+                <p>Total: <strong>{{ d.total }}</strong></p>
+                <p>Admitidos: <strong class="text-success">{{ d.admitted_total }}</strong></p>
+                <hr>
+                <p>Masculino: {{ d.gender_admitted.m }}</p>
+                <p>Feminino: {{ d.gender_admitted.f }}</p>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endfor %}
+{% endif %}
+
+{% else %}
+<!-- ================= LISTA CANDIDATOS (DISTRITAL) ================= -->
+<div class="card border-0 shadow-sm">
+    <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+        <h5 class="fw-bold mb-0 text-secondary">Candidaturas Pendentes (Recentes)</h5>
+        <a href="{% url 'candidaturas:lista_verificacao' %}" class="btn btn-sm btn-outline-primary">Ver Todas</a>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="bg-light">
+                <tr>
+                    <th class="ps-4">Candidato</th>
+                    <th>Vaga</th>
+                    <th>Data</th>
+                    <th class="text-end pe-4">Ação</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for c in candidatos_recentes %}
+                <tr>
+                    <td class="ps-4 fw-bold">{{ c.nome_completo }}</td>
+                    <td><span class="badge bg-secondary bg-opacity-10 text-secondary">{{ c.vaga.titulo }}</span>
+                    </td>
+                    <td class="text-muted">{{ c.data_criacao|date:"d/m/Y" }}</td>
+                    <td class="text-end pe-4">
+                        <a href="{% url 'candidaturas:detalhe_candidato' c.pk %}" class="btn btn-sm btn-primary">
+                            Analisar
+                        </a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4" class="text-center text-muted py-4">Sem candidaturas pendentes.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+{{ stats_estado|json_script:"status-data" }}
+{{ stats_funcao|json_script:"role-data" }}
+{{ detalhes_provincia|json_script:"map-data" }}
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+
+        // --- DATA LOAD ---
+        function safeParse(id, fallback) {
+            const el = document.getElementById(id);
+            return el ? JSON.parse(el.textContent) : fallback;
+        }
+
+        const statusDataRaw = safeParse('status-data', []);
+        const roleDataRaw = safeParse('role-data', []);
+        const mapDataRaw = safeParse('map-data', []);
+
+        // --- MAP ---
+        const mapContainer = document.getElementById('map');
+        if (mapContainer && mapDataRaw.length > 0) {
+            const map = L.map('map').setView([-18.66, 35.52], 5); // Center of Moz
+
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; OpenStreetMap contributors'
+            }).addTo(map);
+
+            mapDataRaw.forEach(prov => {
+                if (prov.lat && prov.lon) {
+                    const marker = L.marker([prov.lat, prov.lon]).addTo(map);
+
+                    const popupContent = `
+                        <div class="text-center">
+                            <strong>${prov.nome}</strong><br>
+                            Total: ${prov.total}<br>
+                            <span class="text-success">Admitidos: ${prov.admitted_total}</span>
+                        </div>
+                    `;
+                    marker.bindPopup(popupContent);
+                }
+            });
+        } else if (mapContainer) {
+            mapContainer.innerHTML = '<div class="h-100 d-flex align-items-center justify-content-center text-muted">Sem dados geográficos para exibir no mapa.</div>';
+        }
+
+
+        // --- CHARTS ---
+
+        // 1. Status Chart (Doughnut)
+        const statusCtx = document.getElementById('statusChart');
+        if (statusCtx && statusDataRaw.length > 0) {
+            new Chart(statusCtx.getContext('2d'), {
+                type: 'doughnut',
+                data: {
+                    labels: statusDataRaw.map(item => item.label),
+                    datasets: [{
+                        data: statusDataRaw.map(item => item.count),
+                        backgroundColor: ['#ffc107', '#0d6efd', '#dc3545', '#17a2b8', '#198754', '#6c757d', '#20c997'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: { legend: { position: 'right' } }
+                }
+            });
+        }
+
+        // 2. Roles Chart (Bar)
+        const roleCtx = document.getElementById('roleChart');
+        if (roleCtx && roleDataRaw.length > 0) {
+            new Chart(roleCtx.getContext('2d'), {
+                type: 'bar',
+                data: {
+                    labels: roleDataRaw.map(item => item.label),
+                    datasets: [{
+                        label: 'Candidatos',
+                        data: roleDataRaw.map(item => item.count),
+                        backgroundColor: '#0d6efd',
+                        borderRadius: 5
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: { y: { beginAtZero: true, ticks: { precision: 0 } } },
+                    plugins: { legend: { display: false } }
+                }
+            });
+        }
+    });
+</script>
+{% endblock %}
