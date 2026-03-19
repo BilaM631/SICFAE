@@ -4,6 +4,7 @@ Django settings for DRH project (Direção de Recursos Humanos).
 
 from pathlib import Path
 from decouple import config, Csv
+import dj_database_url
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -29,6 +30,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'simple_history.middleware.HistoryRequestMiddleware',
@@ -59,7 +61,9 @@ TEMPLATES = [
 WSGI_APPLICATION = 'DRH.wsgi.application'
 
 DATABASES = {
-    'default': {
+    'default': dj_database_url.config(
+        default=config('DATABASE_URL', default=None)
+    ) if config('DATABASE_URL', default=None) else {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db_drh.sqlite3',
     }
@@ -78,7 +82,11 @@ USE_I18N = True
 USE_TZ = True
 
 STATIC_URL = 'static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_DIRS = [BASE_DIR / 'static']
+
+# WhiteNoise storage for compressed static files
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 MEDIA_URL = '/media/'

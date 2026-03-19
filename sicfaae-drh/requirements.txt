@@ -6,3 +6,7 @@ openpyxl
 reportlab
 Pillow
 requests
+psycopg2-binary
+dj-database-url
+gunicorn
+whitenoise
