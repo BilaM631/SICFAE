@@ -179,6 +179,7 @@ class ListaVerificacaoView(LoginRequiredMixin, generic.ListView):
     model = Candidato
     template_name = 'candidaturas/lista_candidatos.html'
     context_object_name = 'candidatos'
+    paginate_by = 30
 
     def get_queryset(self):
         # Começa com o queryset base que já aplica filtros de permissão (obter_candidatos_acessiveis)

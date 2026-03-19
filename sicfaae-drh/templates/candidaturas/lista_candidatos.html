@@ -145,6 +145,41 @@
                         {% endfor %}
                     </tbody>
                 </table>
+                
+                {% if is_paginated %}
+                <nav aria-label="Navegação de página" class="mt-4">
+                    <ul class="pagination justify-content-center">
+                        {% if page_obj.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page=1{% if request.GET.estado %}&estado={{ request.GET.estado }}{% endif %}{% if request.GET.vaga %}&vaga={{ request.GET.vaga }}{% endif %}{% if request.GET.genero %}&genero={{ request.GET.genero }}{% endif %}{% if request.GET.provincia %}&provincia={{ request.GET.provincia }}{% endif %}" aria-label="Primeira">
+                                <span aria-hidden="true">&laquo;&laquo;</span>
+                            </a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.estado %}&estado={{ request.GET.estado }}{% endif %}{% if request.GET.vaga %}&vaga={{ request.GET.vaga }}{% endif %}{% if request.GET.genero %}&genero={{ request.GET.genero }}{% endif %}{% if request.GET.provincia %}&provincia={{ request.GET.provincia }}{% endif %}" aria-label="Anterior">
+                                <span aria-hidden="true">&laquo;</span>
+                            </a>
+                        </li>
+                        {% endif %}
+
+                        <li class="page-item active"><span class="page-link">Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span></li>
+
+                        {% if page_obj.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.estado %}&estado={{ request.GET.estado }}{% endif %}{% if request.GET.vaga %}&vaga={{ request.GET.vaga }}{% endif %}{% if request.GET.genero %}&genero={{ request.GET.genero }}{% endif %}{% if request.GET.provincia %}&provincia={{ request.GET.provincia }}{% endif %}" aria-label="Próxima">
+                                <span aria-hidden="true">&raquo;</span>
+                            </a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if request.GET.estado %}&estado={{ request.GET.estado }}{% endif %}{% if request.GET.vaga %}&vaga={{ request.GET.vaga }}{% endif %}{% if request.GET.genero %}&genero={{ request.GET.genero }}{% endif %}{% if request.GET.provincia %}&provincia={{ request.GET.provincia }}{% endif %}" aria-label="Última">
+                                <span aria-hidden="true">&raquo;&raquo;</span>
+                            </a>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+                {% endif %}
+                
                 {% else %}
                 <p class="text-muted text-center py-4">Nenhuma candidatura encontrada com este filtro.</p>
                 {% endif %}
