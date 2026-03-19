@@ -1,0 +1,94 @@
+{% extends 'candidaturas/base.html' %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-4">
+        <div class="card shadow mb-3">
+            <div class="card-header bg-light">
+                <h5 class="mb-0">Dados do Candidato</h5>
+            </div>
+            <div class="card-body text-center">
+                {% if object.candidato.foto %}
+                <div class="ratio ratio-1x1 mb-3 mx-auto" style="width: 150px;">
+                    <img src="{{ object.candidato.foto.url }}" class="rounded-circle object-fit-cover" alt="Foto">
+                </div>
+                {% endif %}
+                <h5>{{ object.candidato.nome_completo }}</h5>
+                <p class="text-muted">{{ object.candidato.vaga.titulo }}</p>
+                <hr>
+                <div class="text-start">
+                    <p><strong>Idade:</strong> {{ object.candidato.idade|default:"-" }} anos</p>
+                    <p><strong>Experiência:</strong> (Ver CV)</p>
+                    <div class="d-grid">
+                        {% if object.candidato.arquivo_cv %}
+                        <a href="{{ object.candidato.arquivo_cv.url }}" target="_blank"
+                            class="btn btn-sm btn-outline-primary mb-2">
+                            📄 Abrir CV
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-8">
+        <div class="card shadow">
+            <div class="card-header bg-success text-white">
+                <h4 class="mb-0">Ficha de Avaliação</h4>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+
+                    <div class="alert alert-warning">
+                        <small>Avalie cada critério de 0 a 20 valores.</small>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label fw-bold">{{ form.nota_tecnica.label }}</label>
+                            {{ form.nota_tecnica }}
+                            <div class="text-danger small">{{ form.nota_tecnica.errors }}</div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label fw-bold">{{ form.nota_comunicacao.label }}</label>
+                            {{ form.nota_comunicacao }}
+                            <div class="text-danger small">{{ form.nota_comunicacao.errors }}</div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label fw-bold">{{ form.nota_experiencia.label }}</label>
+                            {{ form.nota_experiencia }}
+                            <div class="text-danger small">{{ form.nota_experiencia.errors }}</div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">{{ form.observacoes.label }}</label>
+                        {{ form.observacoes }}
+                        <div class="text-danger small">{{ form.observacoes.errors }}</div>
+                    </div>
+
+                    <hr>
+
+                    <div class="bg-light p-3 rounded mb-4">
+                        <h5 class="mb-3">Decisão Final</h5>
+                        <div class="mb-0">
+                            <label class="form-label fw-bold">{{ form.resultado.label }}</label>
+                            {{ form.resultado }}
+                            <div class="text-danger small">{{ form.resultado.errors }}</div>
+                        </div>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-success btn-lg">
+                            ✅ Finalizar Avaliação
+                        </button>
+                        <a href="{% url 'candidaturas:detalhe_candidato' object.candidato.pk %}" class="btn btn-link text-muted">Voltar para Detalhes</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

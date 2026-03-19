@@ -1,0 +1,53 @@
+{% extends 'candidaturas/base.html' %}
+
+{% block content %}
+<div class="row justify-content-center align-items-center min-vh-100" style="margin-top: -100px;">
+    <div class="col-md-5 col-lg-4">
+        <div class="card border-0 shadow-lg rounded-4 overflow-hidden">
+            <div class="card-header bg-primary text-white text-center py-4 border-0">
+                <i class="bi bi-person-badge fs-1"></i>
+                <h4 class="fw-bold mb-0 mt-2">Acesso Restrito</h4>
+                <p class="mb-0 small opacity-75">Portal Exclusivo do Entrevistador</p>
+            </div>
+            <div class="card-body p-4 p-md-5">
+                {% if messages %}
+                {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                {% endfor %}
+                {% endif %}
+
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    <div class="mb-3">
+                        <label class="form-label text-muted small fw-bold">Nome de Acesso</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-end-0"><i class="bi bi-person text-secondary"></i></span>
+                            <input type="text" name="username" class="form-control bg-light border-start-0 py-2" placeholder="O código que lhe foi fornecido" required>
+                        </div>
+                        <div class="form-text">Insira o seu Código de Acesso aqui.</div>
+                    </div>
+                    
+                    <!-- O password é o mesmo que o username/código, por conveniência podemos usar um type="password" para segurança visual na escrita ou simplificado num só input se fosse alterado, mas como o LoginView pede username/password fazemos os dois idênticos via JS ou pedimos para repetir. Para ser simples, pedimos Código de Acesso 2x ou alteramos o form. Usaremos username e password padrão. -->
+                    <div class="mb-4">
+                        <label class="form-label text-muted small fw-bold">Código de Acesso (Senha)</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-end-0"><i class="bi bi-key text-secondary"></i></span>
+                            <input type="password" name="password" class="form-control bg-light border-start-0 py-2" placeholder="Repita o seu código" required>
+                        </div>
+                    </div>
+
+                    <div class="d-grid mt-4">
+                        <button type="submit" class="btn btn-primary py-2 fw-bold text-uppercase shadow-sm">
+                            <i class="bi bi-box-arrow-in-right me-2"></i>Entrar
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

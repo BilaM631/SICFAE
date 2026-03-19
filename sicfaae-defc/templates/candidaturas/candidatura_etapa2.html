@@ -1,0 +1,177 @@
+{% extends 'candidaturas/base.html' %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card shadow-lg border-0 rounded-3 my-5">
+            <div class="card-header bg-success text-white p-5 text-center"
+                style="background: linear-gradient(135deg, #198754 0%, #146c43 100%);">
+                <div class="display-1 mb-3">📄</div>
+                <h2 class="fw-bold mb-0">Ficha de Candidatura</h2>
+                <p class="opacity-75">Etapa 2 de 2: Documentos</p>
+            </div>
+
+            <!-- Progress Bar -->
+            <div class="px-5 pt-4">
+                <div class="progress" style="height: 8px;">
+                    <div class="progress-bar bg-success" role="progressbar" style="width: 100%;" aria-valuenow="100"
+                        aria-valuemin="0" aria-valuemax="100"></div>
+                </div>
+                <div class="d-flex justify-content-between mt-2">
+                    <small class="text-success">✓ Dados Pessoais</small>
+                    <small class="text-success fw-bold">✓ Documentos</small>
+                </div>
+            </div>
+
+            <div class="card-body p-5">
+                <!-- Resumo dos Dados da Etapa 1 -->
+                {% if dados_etapa1 %}
+                <div class="alert alert-light border-0 shadow-sm mb-5">
+                    <h6 class="text-success fw-bold mb-3">📋 Resumo dos Seus Dados</h6>
+                    <div class="row g-2 small">
+                        <div class="col-md-6">
+                            <strong>Nome:</strong> {{ dados_etapa1.nome_completo }}
+                        </div>
+                        <div class="col-md-6">
+                            <strong>BI:</strong> {{ dados_etapa1.numero_bi }}
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Género:</strong> {{ dados_etapa1.genero }}
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Data de Nascimento:</strong> {{ dados_etapa1.data_nascimento|default:"Não informada"
+                            }}
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Telefone:</strong> {{ dados_etapa1.numero_telefone }}
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Vaga:</strong> {{ dados_etapa1.vaga }}
+                        </div>
+                        <div class="col-12">
+                            <strong>Localização:</strong> {{ dados_etapa1.distrito }}, {{ dados_etapa1.provincia }}
+                        </div>
+                    </div>
+                    <div class="text-end mt-3">
+                        <a href="{% url 'candidaturas:registar_etapa1' %}" class="btn btn-sm btn-outline-secondary">
+                            ← Voltar e Editar
+                        </a>
+                    </div>
+                </div>
+                {% endif %}
+
+                <form method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
+                    {% csrf_token %}
+
+                    {% if form.non_field_errors %}
+                    <div class="alert alert-danger border-0 shadow-sm mb-4">
+                        {{ form.non_field_errors }}
+                    </div>
+                    {% endif %}
+
+                    <!-- Section: Documentos -->
+                    <h5 class="text-success fw-bold mb-4 d-flex align-items-center">
+                        <span
+                            class="bg-success text-white rounded-circle d-inline-flex align-items-center justify-content-center me-2"
+                            style="width: 30px; height: 30px; font-size: 0.8rem;">2</span>
+                        Documentação Obrigatória
+                    </h5>
+
+                    <div class="row g-4 mb-4">
+                        <div class="col-md-6">
+                            <div class="p-4 border rounded-3 bg-light h-100 text-center">
+                                <div class="fs-1 mb-2">📄</div>
+                                <label class="form-label fw-bold">Curriculum Vitae</label>
+                                {{ form.arquivo_cv }}
+                                <div class="form-text small">Formato PDF ou Word</div>
+                                <div class="text-danger small mt-1">{{ form.arquivo_cv.errors }}</div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="p-4 border rounded-3 bg-light h-100 text-center">
+                                <div class="fs-1 mb-2">🪪</div>
+                                <label class="form-label fw-bold">Cópia do BI</label>
+                                {{ form.arquivo_bi }}
+                                <div class="form-text small">PDF ou Imagem nítida</div>
+                                <div class="text-danger small mt-1">{{ form.arquivo_bi.errors }}</div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="p-4 border rounded-3 bg-light h-100 text-center">
+                                <div class="fs-1 mb-2">🎓</div>
+                                <label class="form-label fw-bold">Certificado</label>
+                                {{ form.arquivo_certificado }}
+                                <div class="form-text small">Certificado de Habilitações</div>
+                                <div class="text-danger small mt-1">{{ form.arquivo_certificado.errors }}</div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="p-4 border rounded-3 bg-light h-100 text-center">
+                                <div class="fs-1 mb-2">📸</div>
+                                <label class="form-label fw-bold">Foto Tipo Passe</label>
+                                {{ form.foto }}
+                                <div class="form-text small">Foto recente (Opcional)</div>
+                                <div class="text-danger small mt-1">{{ form.foto.errors }}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mt-4">
+                        <div class="col-md-6">
+                            <a href="{% url 'candidaturas:registar_etapa1' %}"
+                                class="btn btn-outline-secondary btn-lg py-3 fw-bold rounded-pill w-100">
+                                ← Voltar
+                            </a>
+                        </div>
+                        <div class="col-md-6">
+                            <button type="submit"
+                                class="btn btn-success btn-lg py-3 fw-bold rounded-pill shadow-sm hover-scale w-100">
+                                🚀 Submeter Candidatura
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <div class="card-footer bg-light p-4 text-center border-0 rounded-bottom-3">
+                <small class="text-muted">Ao submeter, você concorda com o processamento dos seus dados pelo
+                    STAE.</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .hover-scale {
+        transition: transform 0.2s;
+    }
+
+    .hover-scale:hover {
+        transform: scale(1.02);
+    }
+
+    .alert-light {
+        background-color: #f8f9fa;
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    $(document).ready(function () {
+        // File input preview (optional enhancement)
+        $('input[type="file"]').change(function () {
+            const fileName = $(this).val().split('\\').pop();
+            if (fileName) {
+                $(this).next('.form-text').html('✓ ' + fileName);
+            }
+        });
+    });
+</script>
+{% endblock %}

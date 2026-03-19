@@ -1,0 +1,94 @@
+{% extends 'candidaturas/base.html' %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card border-0 shadow-sm rounded-4">
+                <div class="card-header bg-white py-3 border-0">
+                    <div class="d-flex align-items-center">
+                        <div class="rounded-circle bg-primary bg-opacity-10 p-3 me-3">
+                            <i class="bi bi-person-plus-fill text-primary fs-4"></i>
+                        </div>
+                        <div>
+                            <h5 class="fw-bold mb-1">Registar Novo Formador</h5>
+                            <p class="text-secondary small mb-0">Cadastro manual de instrutor/mestre certificado.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-body p-4">
+                    <form method="post" class="needs-validation" novalidate>
+                        {% csrf_token %}
+
+                        <div class="row g-3">
+                            <!-- Dados Pessoais -->
+                            <div class="col-md-12">
+                                <h6 class="text-primary border-bottom pb-2 mb-3">Dados Pessoais</h6>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold small text-uppercase text-secondary">Nome
+                                    Completo</label>
+                                {{ form.nome_completo }}
+                                {% if form.nome_completo.errors %}<div class="text-danger small">{{
+                                    form.nome_completo.errors }}</div>{% endif %}
+                            </div>
+
+                            <div class="col-md-3">
+                                <label class="form-label fw-bold small text-uppercase text-secondary">Gênero</label>
+                                {{ form.genero }}
+                            </div>
+
+                            <div class="col-md-3">
+                                <label class="form-label fw-bold small text-uppercase text-secondary">Nascimento</label>
+                                {{ form.data_nascimento }}
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold small text-uppercase text-secondary">Número de
+                                    BI</label>
+                                {{ form.numero_bi }}
+                                {% if form.numero_bi.errors %}<div class="text-danger small">{{ form.numero_bi.errors }}
+                                </div>{% endif %}
+                            </div>
+
+                            <!-- Contato -->
+                            <div class="col-md-12 mt-4">
+                                <h6 class="text-primary border-bottom pb-2 mb-3">Contatos e Localização</h6>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold small text-uppercase text-secondary">Telefone /
+                                    Telemóvel</label>
+                                {{ form.numero_telefone }}
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold small text-uppercase text-secondary">Província de
+                                    Residência</label>
+                                {{ form.provincia_residencia }}
+                                <div class="form-text">O formador será alocado ao distrito sede desta província.</div>
+                            </div>
+
+                            <div class="col-md-12">
+                                <label class="form-label fw-bold small text-uppercase text-secondary">Endereço</label>
+                                {{ form.endereco }}
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2 mt-5">
+                            <button type="submit" class="btn btn-primary py-2 fw-bold">
+                                <i class="bi bi-save me-2"></i> Registar Formador
+                            </button>
+                            <a href="{% url 'formacao:dashboard_formadores' %}" class="btn btn-light text-secondary">
+                                Cancelar
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

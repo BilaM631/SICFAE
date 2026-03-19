@@ -1,0 +1,56 @@
+{% extends 'candidaturas/base.html' %}
+
+{% block content %}
+<div class="card shadow">
+    <div class="card-header bg-white d-flex justify-content-between align-items-center">
+        <h4 class="mb-0">Minhas Entrevistas Agendadas</h4>
+        <span class="badge bg-primary">{{ entrevistas.count }} Pendentes</span>
+    </div>
+    <div class="card-body p-0">
+        {% if entrevistas %}
+        <div class="table-responsive">
+            <table class="table table-hover mb-0 align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>Data e Hora</th>
+                        <th>Candidato</th>
+                        <th>Vaga</th>
+                        <th>Local</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for entrevista in entrevistas %}
+                    <tr>
+                        <td>
+                            <div class="fw-bold">{{ entrevista.data_hora|date:"d/m/Y" }}</div>
+                            <div class="text-muted small">{{ entrevista.data_hora|date:"H:i" }}</div>
+                        </td>
+                        <td>
+                            <a href="{% url 'candidaturas:detalhe_candidato' entrevista.candidato.pk %}"
+                                class="text-decoration-none">
+                                {{ entrevista.candidato.nome_completo }}
+                            </a>
+                        </td>
+                        <td><span class="badge bg-secondary">{{ entrevista.candidato.vaga.titulo }}</span></td>
+                        <td>{{ entrevista.local }}</td>
+                        <td>
+                            <a href="{% url 'candidaturas:realizar_entrevista' entrevista.pk %}"
+                                class="btn btn-sm btn-success">
+                                ▶️ Realizar Entrevista
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="p-5 text-center">
+            <p class="text-muted display-6">📅</p>
+            <p class="lead">Nenhuma entrevista agendada para você momento.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,63 @@
+{% extends 'formacao/base.html' %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold text-dark">Formadores de Nível 1</h2>
+        <a href="{% url 'formacao:cadastrar_formador_nacional' %}" class="btn btn-primary">
+            <i class="bi bi-person-plus-fill me-2"></i> Adicionar Formador
+        </a>
+    </div>
+
+    <div class="card border-0 shadow-sm">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="bg-light">
+                    <tr>
+                        <th class="ps-4">Código</th>
+                        <th>Nome Completo</th>
+                        <th>Nº de BI</th>
+                        <th>Contacto</th>
+                        <th>Província/Distrito</th>
+                        <th class="text-end pe-4">Ação</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for formador in formadores %}
+                    <tr>
+                        <td class="ps-4 fw-bold text-primary">{{ formador.codigo_candidato }}</td>
+                        <td>{{ formador.nome_completo|title }}</td>
+                        <td>{{ formador.numero_bi }}</td>
+                        <td>{{ formador.numero_telefone|default:"-" }}</td>
+                        <td>
+                            {% if formador.provincia %}
+                                {{ formador.provincia.nome }} 
+                                {% if formador.distrito %} - {{ formador.distrito.nome }}{% endif %}
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+                        <td class="text-end pe-4">
+                            <a href="{% url 'formacao:editar_formador_nacional' formador.pk %}"
+                                class="btn btn-sm btn-outline-primary ms-1">
+                                <i class="bi bi-pencil"></i> Editar
+                            </a>
+                            <a href="{% url 'formacao:apagar_formador_nacional' formador.pk %}"
+                                class="btn btn-sm btn-outline-danger ms-1">
+                                <i class="bi bi-trash"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-center py-5 text-muted">
+                            Nenhum formador de nível 1 registado.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

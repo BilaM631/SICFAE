@@ -1,0 +1,149 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt">
+
+<head>
+    <meta charset="UTF-8">
+    <title>{{ titulo }}</title>
+    <style>
+        body {
+            font-family: Helvetica, Arial, sans-serif;
+            font-size: 12px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #333;
+            padding-bottom: 10px;
+        }
+
+        .footer {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            text-align: center;
+            font-size: 10px;
+            color: #666;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        th,
+        td {
+            border: 1px solid #ddd;
+            padding: 6px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+
+        .badge-create {
+            color: green;
+            font-weight: bold;
+        }
+
+        .badge-update {
+            color: navy;
+            font-weight: bold;
+        }
+
+        .badge-delete {
+            color: red;
+            font-weight: bold;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 18px;
+            text-transform: uppercase;
+        }
+
+        .meta {
+            font-size: 10px;
+            color: #555;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="header">
+        <h1>SICFAAE - Sistema de Recrutamento</h1>
+        <h2>{{ titulo }}</h2>
+        <div class="meta">Gerado em: {% now "d/m/Y H:i" %} | Por: {{ user_name }}</div>
+        <div class="meta" style="color: red; font-weight: bold;">DOCUMENTO CONFIDENCIAL - USO EXCLUSIVO DA ADMINISTRAÇÃO
+        </div>
+    </div>
+
+    <p>Exibindo as últimas 100 alterações registadas no sistema (Módulo Candidaturas).</p>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Data/Hora</th>
+                <th>Usuário</th>
+                <th>Ação</th>
+                <th>Candidato (ID)</th>
+                <th>Alterações</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for record in historico %}
+            <tr>
+                <td>{{ record.history_date|date:"d/m/Y H:i:s" }}</td>
+                <td>
+                    {% if record.history_user %}
+                    {{ record.history_user.username }}
+                    {% else %}
+                    Sistema
+                    {% endif %}
+                </td>
+                <td>
+                    {% if record.history_type == '+' %}
+                    <span class="badge-create">Criação</span>
+                    {% elif record.history_type == '~' %}
+                    <span class="badge-update">Atualização</span>
+                    {% elif record.history_type == '-' %}
+                    <span class="badge-delete">Remoção</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {{ record.nome_completo }} ({{ record.id }})
+                </td>
+                <td>
+                    {% if record.history_type == '~' and record.prev_record %}
+                    <ul>
+                        {% for delta in record.diff_against_prev %}
+                        <li><strong>{{ delta.field }}</strong>:
+                            <span style="text-decoration: line-through; color: #777;">{{ delta.old }}</span>
+                            &rarr; {{ delta.new }}
+                        </li>
+                        {% endfor %}
+                    </ul>
+                    {% else %}
+                    -
+                    {% endif %}
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="5" style="text-align: center;">Nenhum registo de auditoria encontrado.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="footer">
+        SICFAAE v2.0 - Relatório de Segurança e Auditoria
+    </div>
+</body>
+
+</html>

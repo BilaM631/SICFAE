@@ -1,0 +1,159 @@
+{% extends 'formacao/base.html' %}
+
+{% block title %}DEFC - Cadastrar Formador de Nível 1{% endblock %}
+{% block header_title %}Cadastrar Formadores Mestres (Nível 1){% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-white border-bottom p-4">
+                <div class="d-flex align-items-center">
+                    <div class="icon-circle bg-primary-subtle text-primary me-3">
+                        <i class="bi bi-person-badge fs-4"></i>
+                    </div>
+                    <div>
+                        <h5 class="mb-1 fw-bold">Novo Formador de Nível 1</h5>
+                        <p class="mb-0 text-muted small">
+                            Preencha os dados do formador que será alocado para a criação das Turmas de Formadores Nacionais.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card-body p-4">
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    
+                    {% if form.non_field_errors %}
+                    <div class="alert alert-danger shadow-sm border-0">
+                        {{ form.non_field_errors }}
+                    </div>
+                    {% endif %}
+
+                    <div class="row g-3">
+                        <div class="col-md-8">
+                            <label class="form-label fw-bold text-dark">Nome Completo</label>
+                            {{ form.nome_completo }}
+                            {% if form.nome_completo.errors %}
+                            <div class="text-danger small mt-1">{{ form.nome_completo.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold text-dark">Género</label>
+                            {{ form.genero }}
+                            {% if form.genero.errors %}
+                            <div class="text-danger small mt-1">{{ form.genero.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold text-dark">Número de BI</label>
+                            {{ form.numero_bi }}
+                            {% if form.numero_bi.errors %}
+                            <div class="text-danger small mt-1">{{ form.numero_bi.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold text-dark">Telefone</label>
+                            {{ form.numero_telefone }}
+                            {% if form.numero_telefone.errors %}
+                            <div class="text-danger small mt-1">{{ form.numero_telefone.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold text-dark">Data de Nascimento</label>
+                            {{ form.data_nascimento }}
+                            {% if form.data_nascimento.errors %}
+                            <div class="text-danger small mt-1">{{ form.data_nascimento.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <hr class="my-4 text-secondary opacity-50">
+
+                    <h6 class="fw-bold mb-3 text-primary">Localização do Formador</h6>
+                    
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold text-dark">Província</label>
+                            {{ form.provincia }}
+                            {% if form.provincia.errors %}
+                            <div class="text-danger small mt-1">{{ form.provincia.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold text-dark">Distrito</label>
+                            {{ form.distrito }}
+                            {% if form.distrito.errors %}
+                            <div class="text-danger small mt-1">{{ form.distrito.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-12">
+                            <label class="form-label fw-bold text-dark">Endereço Residencial</label>
+                            {{ form.endereco }}
+                            {% if form.endereco.errors %}
+                            <div class="text-danger small mt-1">{{ form.endereco.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-end gap-2 mt-4 pt-3 border-top">
+                        <a href="{% url 'formacao:dashboard_geral' %}" class="btn btn-light px-4">Cancelar</a>
+                        <button type="submit" class="btn btn-primary px-4">
+                            <i class="bi bi-save me-2"></i>Registar Formador
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const provinciaSelect = document.getElementById('id_provincia');
+        const distritoSelect = document.getElementById('id_distrito');
+        
+        // Dados provindos do View
+        const distritosPorProvincia = JSON.parse('{{ distritos_json|escapejs|default:"{}" }}');
+        
+        // Guardar o distrito inicialmente selecionado pelo Django (em caso de erro no form)
+        const selectedDistrito = distritoSelect.value;
+        
+        function atualizarDistritos() {
+            const provId = provinciaSelect.value;
+            
+            // Limpar distritos actuais
+            distritoSelect.innerHTML = '<option value="">---------</option>';
+            
+            if (provId && distritosPorProvincia[provId]) {
+                const distritos = distritosPorProvincia[provId];
+                
+                // Opção por ordem alfabetica ou dada pelo JSON
+                distritos.forEach(function(dist) {
+                    const option = document.createElement('option');
+                    option.value = dist.id;
+                    option.textContent = dist.nome;
+                    if (dist.id.toString() === selectedDistrito) {
+                        option.selected = true;
+                    }
+                    distritoSelect.appendChild(option);
+                });
+            }
+        }
+        
+        // Listeners e execução inicial
+        if (provinciaSelect && distritoSelect) {
+            provinciaSelect.addEventListener('change', atualizarDistritos);
+            // Atualizar na carga inicial da página
+            atualizarDistritos();
+        }
+    });
+</script>
+{% endblock %}

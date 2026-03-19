@@ -1,0 +1,207 @@
+{% extends 'candidaturas/base.html' %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card shadow-lg border-0 rounded-3 my-5">
+            <div class="card-header bg-success text-white p-5 text-center"
+                style="background: linear-gradient(135deg, #198754 0%, #146c43 100%);">
+                <div class="display-1 mb-3">📝</div>
+                <h2 class="fw-bold mb-0">Ficha de Candidatura</h2>
+                <p class="opacity-75">Preencha os dados abaixo para se candidatar a Agente Eleitoral</p>
+            </div>
+            <div class="card-body p-5">
+                <form method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
+                    {% csrf_token %}
+
+                    {% if form.non_field_errors %}
+                    <div class="alert alert-danger border-0 shadow-sm mb-4">
+                        {{ form.non_field_errors }}
+                    </div>
+                    {% endif %}
+
+                    <!-- Section: Dados Pessoais -->
+                    <h5 class="text-success fw-bold mb-4 d-flex align-items-center">
+                        <span
+                            class="bg-success text-white rounded-circle d-inline-flex align-items-center justify-content-center me-2"
+                            style="width: 30px; height: 30px; font-size: 0.8rem;">1</span>
+                        Dados Pessoais
+                    </h5>
+
+                    <div class="row g-4 mb-4">
+                        <div class="col-12">
+                            <label class="form-label text-muted fw-bold small">Nome Completo</label>
+                            {{ form.nome_completo }}
+                            <div class="text-danger small mt-1">{{ form.nome_completo.errors }}</div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label text-muted fw-bold small">Género</label>
+                            {{ form.genero }}
+                            <div class="text-danger small mt-1">{{ form.genero.errors }}</div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label text-muted fw-bold small">Vaga a Candidatar</label>
+                            {{ form.funcao }}
+                            <div class="text-danger small mt-1">{{ form.funcao.errors }}</div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label text-muted fw-bold small">Número de BI</label>
+                            {{ form.numero_bi }}
+                            <div class="text-danger small mt-1">{{ form.numero_bi.errors }}</div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label text-muted fw-bold small">Telefone</label>
+                            {{ form.numero_telefone }}
+                            <div class="text-danger small mt-1">{{ form.numero_telefone.errors }}</div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label text-muted fw-bold small">Província</label>
+                            {{ form.provincia }}
+                            <div class="text-danger small mt-1">{{ form.provincia.errors }}</div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label text-muted fw-bold small">Distrito</label>
+                            {{ form.distrito }}
+                            <div class="text-danger small mt-1">{{ form.distrito.errors }}</div>
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label text-muted fw-bold small">Endereço</label>
+                            {{ form.endereco }}
+                            <div class="text-danger small mt-1">{{ form.endereco.errors }}</div>
+                        </div>
+                    </div>
+
+                    <hr class="my-5 opacity-10">
+
+                    <!-- Section: Documentos -->
+                    <h5 class="text-success fw-bold mb-4 d-flex align-items-center">
+                        <span
+                            class="bg-success text-white rounded-circle d-inline-flex align-items-center justify-content-center me-2"
+                            style="width: 30px; height: 30px; font-size: 0.8rem;">2</span>
+                        Documentação Obrigatória
+                    </h5>
+
+                    <div class="row g-4 mb-4">
+                        <div class="col-md-6">
+                            <div class="p-4 border rounded-3 bg-light h-100 text-center">
+                                <div class="fs-1 mb-2">📄</div>
+                                <label class="form-label fw-bold">Curriculum Vitae</label>
+                                {{ form.arquivo_cv }}
+                                <div class="form-text small">Formato PDF ou Word</div>
+                                <div class="text-danger small mt-1">{{ form.arquivo_cv.errors }}</div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="p-4 border rounded-3 bg-light h-100 text-center">
+                                <div class="fs-1 mb-2">🪪</div>
+                                <label class="form-label fw-bold">Cópia do BI</label>
+                                {{ form.arquivo_bi }}
+                                <div class="form-text small">PDF ou Imagem nítida</div>
+                                <div class="text-danger small mt-1">{{ form.arquivo_bi.errors }}</div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="p-4 border rounded-3 bg-light h-100 text-center">
+                                <div class="fs-1 mb-2">🎓</div>
+                                <label class="form-label fw-bold">Certificado</label>
+                                {{ form.arquivo_certificado }}
+                                <div class="form-text small">Certificado de Habilitações</div>
+                                <div class="text-danger small mt-1">{{ form.arquivo_certificado.errors }}</div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="p-4 border rounded-3 bg-light h-100 text-center">
+                                <div class="fs-1 mb-2">📸</div>
+                                <label class="form-label fw-bold">Foto Tipo Passe</label>
+                                {{ form.foto }}
+                                <div class="form-text small">Foto recente (Opcional)</div>
+                                <div class="text-danger small mt-1">{{ form.foto.errors }}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-grid mt-5">
+                        <button type="submit"
+                            class="btn btn-success btn-lg py-3 fw-bold rounded-pill shadow-sm hover-scale">
+                            🚀 Submeter Minha Candidatura
+                        </button>
+                    </div>
+                </form>
+            </div>
+            <div class="card-footer bg-light p-4 text-center border-0 rounded-bottom-3">
+                <small class="text-muted">Ao submeter, você concorda com o processamento dos seus dados pelo
+                    STAE.</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_css %}
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<style>
+    .select2-container .select2-selection--single {
+        height: 48px !important;
+        border: 1px solid #ced4da !important;
+        background-color: #f8f9fa !important;
+        border-radius: 0.5rem !important;
+        padding-top: 8px !important;
+    }
+
+    .select2-container--default .select2-selection--single .select2-selection__arrow {
+        height: 46px !important;
+    }
+
+    .hover-scale {
+        transition: transform 0.2s;
+    }
+
+    .hover-scale:hover {
+        transform: scale(1.02);
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<script>
+    $(document).ready(function () {
+        // Initialize Select2
+        $('.select2').select2({
+            theme: 'default',
+            width: '100%'
+        });
+
+        // Cascading Dropdown Logic
+        $('#id_provincia').change(function () {
+            var url = "{% url 'candidaturas:ajax_carregar_distritos' %}";
+            var idProvincia = $(this).val();
+
+            $.ajax({
+                url: url,
+                data: {
+                    'provincia': idProvincia
+                },
+                success: function (data) {
+                    var $distrito = $("#id_distrito");
+                    $distrito.html('<option value="">Selecione o Distrito</option>');
+                    $.each(data, function (key, value) {
+                        $distrito.append('<option value="' + value.id + '">' + value.nome + '</option>');
+                    });
+                    $distrito.trigger('change');
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}

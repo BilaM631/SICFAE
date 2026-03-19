@@ -1,0 +1,118 @@
+{% extends 'candidaturas/base.html' %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <a href="{% url 'candidaturas:painel_entrevistador_vaga' %}" class="btn btn-link text-decoration-none p-0 mb-3">
+            <i class="bi bi-arrow-left me-1"></i> Voltar ao Painel
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Header/Info do Candidato -->
+    <div class="col-md-4 mb-4">
+        <div class="card border-0 shadow-sm sticky-top" style="top: 20px;">
+            <div class="card-body text-center p-4">
+                {% if candidato.foto %}
+                <img src="{{ candidato.foto.url }}" alt="Foto do Candidato" class="rounded-circle mb-3 border border-3 border-light shadow-sm" style="width: 120px; height: 120px; object-fit: cover;">
+                {% else %}
+                <div class="bg-light rounded-circle mb-3 mx-auto d-flex align-items-center justify-content-center border border-3 border-white shadow-sm" style="width: 120px; height: 120px;">
+                    <i class="bi bi-person text-secondary" style="font-size: 4rem;"></i>
+                </div>
+                {% endif %}
+                <h5 class="fw-bold mb-1">{{ candidato.nome_completo }}</h5>
+                <p class="text-muted small mb-3">BI: {{ candidato.numero_bi }}</p>
+                <div class="d-grid gap-2">
+                    {% if candidato.arquivo_cv %}
+                    <a href="{{ candidato.arquivo_cv.url }}" class="btn btn-outline-secondary btn-sm" target="_blank">
+                        <i class="bi bi-file-earmark-pdf me-1"></i>Ver CV
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Ficha de Avaliação -->
+    <div class="col-md-8">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white py-3 border-bottom">
+                <h5 class="fw-bold mb-0 text-primary"><i class="bi bi-ui-checks me-2"></i>Ficha de Avaliação (Entrevista)</h5>
+                <p class="text-muted small mb-0 mt-1">Insira as notas de 0 a 20 para cada critério.</p>
+            </div>
+            <div class="card-body p-4">
+                
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    {% if form.errors %}
+                    <div class="alert alert-danger">
+                        Corrija os erros assinalados no formulário.
+                    </div>
+                    {% endif %}
+
+                    <div class="row g-4 mb-4">
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold">Técnica (0-20)</label>
+                            {{ form.nota_tecnica }}
+                            {% if form.nota_tecnica.errors %}<div class="text-danger small mt-1">{{ form.nota_tecnica.errors }}</div>{% endif %}
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold">Comunicação (0-20)</label>
+                            {{ form.nota_comunicacao }}
+                            {% if form.nota_comunicacao.errors %}<div class="text-danger small mt-1">{{ form.nota_comunicacao.errors }}</div>{% endif %}
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold">Experiência (0-20)</label>
+                            {{ form.nota_experiencia }}
+                            {% if form.nota_experiencia.errors %}<div class="text-danger small mt-1">{{ form.nota_experiencia.errors }}</div>{% endif %}
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label fw-bold text-muted">Resultado Final da Entrevista</label>
+                        {{ form.resultado }}
+                        <div class="form-text">A seleção de 'Aprovado' ou 'Reprovado' irá alterar o estado deste candidato de forma automática e irreversível.</div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label fw-bold text-muted">Observações</label>
+                        {{ form.observacoes }}
+                    </div>
+
+                    <hr>
+                    <div class="d-flex justify-content-end">
+                        <button type="submit" class="btn btn-success btn-lg px-5 shadow-sm fw-bold">
+                            <i class="bi bi-check-circle me-2"></i>Submeter Avaliação
+                        </button>
+                    </div>
+                </form>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Script para calcular a média instantaneamente -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const inputs = [
+            document.querySelector('#id_nota_tecnica'),
+            document.querySelector('#id_nota_comunicacao'),
+            document.querySelector('#id_nota_experiencia')
+        ];
+        
+        // Simples verificação visual
+        inputs.forEach(input => {
+            if(input) {
+                input.addEventListener('input', function() {
+                    let val = parseInt(this.value);
+                    if(val < 0) this.value = 0;
+                    if(val > 20) this.value = 20;
+                });
+            }
+        });
+    });
+</script>
+{% endblock %}

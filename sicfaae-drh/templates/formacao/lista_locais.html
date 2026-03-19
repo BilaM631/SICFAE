@@ -1,0 +1,55 @@
+{% extends 'candidaturas/base.html' %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold text-dark">Locais de Formação</h2>
+        <a href="{% url 'formacao:criar_local' %}" class="btn btn-primary">
+            <i class="bi bi-plus-lg me-2"></i> Novo Local
+        </a>
+    </div>
+
+    <div class="card border-0 shadow-sm">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="bg-light">
+                    <tr>
+                        <th class="ps-4">Nome do Local</th>
+                        <th>Distrito</th>
+                        <th>Capacidade</th>
+                        <th>Detalhes</th>
+                        <th class="text-end pe-4">Ação</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for local in locais %}
+                    <tr>
+                        <td class="ps-4 fw-bold text-primary">{{ local.nome }}</td>
+                        <td>{{ local.distrito.nome }}</td>
+                        <td>{{ local.capacidade|default:"-" }} lugares</td>
+                        <td>
+                            <small class="text-muted d-block"
+                                style="max-width: 250px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                                {{ local.descricao|default:"-" }}
+                            </small>
+                        </td>
+                        <td class="text-end pe-4">
+                            <a href="{% url 'formacao:editar_local' local.pk %}"
+                                class="btn btn-sm btn-outline-secondary">
+                                <i class="bi bi-pencil"></i> Editar
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" class="text-center py-5 text-muted">
+                            Nenhum local registado.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

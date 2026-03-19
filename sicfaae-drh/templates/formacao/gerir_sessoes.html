@@ -1,0 +1,176 @@
+{% extends 'candidaturas/base.html' %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold text-dark">Sessões de Formação</h2>
+            <p class="text-muted mb-0">
+                <a href="{% url 'formacao:detalhe_turma' turma.pk %}" class="text-decoration-none">{{ turma.nome }}</a>
+                <span class="mx-2">|</span>
+                <span class="badge bg-secondary">{{ turma.distrito.nome }}</span>
+            </p>
+        </div>
+        <div>
+            <a href="{% url 'formacao:criar_sessao' turma.pk %}" class="btn btn-primary">
+                <i class="bi bi-plus-lg me-2"></i> Nova Sessão
+            </a>
+        </div>
+    </div>
+
+    <!-- Estatísticas -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <i class="bi bi-calendar3 fs-1 text-primary"></i>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h6 class="text-muted mb-1">Total Sessões</h6>
+                            <h3 class="mb-0">{{ sessoes|length }}</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <i class="bi bi-check-circle fs-1 text-success"></i>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h6 class="text-muted mb-1">Realizadas</h6>
+                            <h3 class="mb-0">{{ sessoes|selectattr:'realizada'|list|length }}</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <i class="bi bi-clock-history fs-1 text-warning"></i>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h6 class="text-muted mb-1">Carga Horária</h6>
+                            <h3 class="mb-0">{{ turma.carga_horaria_realizada }}h</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <i class="bi bi-people fs-1 text-info"></i>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h6 class="text-muted mb-1">Formadores</h6>
+                            <h3 class="mb-0">{{ formadores_disponiveis|length }}</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lista de Sessões -->
+    <div class="card border-0 shadow-sm">
+        <div class="card-header bg-white py-3">
+            <h5 class="mb-0">Lista de Sessões</h5>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="bg-light">
+                    <tr>
+                        <th class="ps-4">Data</th>
+                        <th>Horário</th>
+                        <th>Tema</th>
+                        <th>Formador</th>
+                        <th class="text-center">Duração</th>
+                        <th class="text-center">Estado</th>
+                        <th class="text-end pe-4">Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for sessao in sessoes %}
+                    <tr>
+                        <td class="ps-4">
+                            <div class="fw-bold">{{ sessao.data|date:"d/m/Y" }}</div>
+                            <small class="text-muted">{{ sessao.data|date:"l" }}</small>
+                        </td>
+                        <td>
+                            <span class="badge bg-secondary bg-opacity-10 text-secondary">
+                                {{ sessao.hora_inicio|time:"H:i" }} - {{ sessao.hora_fim|time:"H:i" }}
+                            </span>
+                        </td>
+                        <td>
+                            <div class="fw-bold">{{ sessao.tema }}</div>
+                            {% if sessao.descricao %}
+                            <small class="text-muted">{{ sessao.descricao|truncatewords:10 }}</small>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if sessao.formador %}
+                            <span class="badge bg-info text-dark">
+                                <i class="bi bi-person me-1"></i> {{ sessao.formador.nome_completo }}
+                            </span>
+                            {% else %}
+                            <span class="text-muted fst-italic">Não atribuído</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-center">
+                            <span class="badge rounded-pill bg-primary">{{ sessao.duracao_horas }}h</span>
+                        </td>
+                        <td class="text-center">
+                            {% if sessao.realizada %}
+                            <span class="badge bg-success">
+                                <i class="bi bi-check-circle me-1"></i> Realizada
+                            </span>
+                            {% else %}
+                            <span class="badge bg-warning text-dark">
+                                <i class="bi bi-clock me-1"></i> Pendente
+                            </span>
+                            {% endif %}
+                        </td>
+                        <td class="text-end pe-4">
+                            <div class="btn-group" role="group">
+                                <a href="{% url 'formacao:registar_presencas' sessao.pk %}"
+                                    class="btn btn-sm btn-outline-primary" title="Registar Presenças">
+                                    <i class="bi bi-check2-square"></i>
+                                </a>
+                                <a href="{% url 'formacao:editar_sessao' sessao.pk %}"
+                                    class="btn btn-sm btn-outline-secondary" title="Editar">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <a href="{% url 'formacao:apagar_sessao' sessao.pk %}"
+                                    class="btn btn-sm btn-outline-danger"
+                                    onclick="return confirm('Tem certeza que deseja apagar esta sessão?');"
+                                    title="Apagar">
+                                    <i class="bi bi-trash"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="text-center py-5 text-muted">
+                            <i class="bi bi-calendar-x fs-1 d-block mb-3"></i>
+                            Nenhuma sessão registada. Crie a primeira sessão!
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

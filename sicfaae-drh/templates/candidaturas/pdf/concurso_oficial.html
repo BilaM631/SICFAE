@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Aviso_Abertura_Concurso_{{ vaga.pk }}</title>
+    <style>
+        @page {
+            size: a4 portrait;
+            @frame header_frame {
+                -pdf-frame-content: header_content;
+                left: 50pt; width: 512pt; top: 30pt; height: 100pt;
+            }
+            @frame content_frame {
+                left: 50pt; width: 512pt; top: 130pt; height: 632pt;
+            }
+            @frame footer_frame {
+                -pdf-frame-content: footer_content;
+                left: 50pt; width: 512pt; top: 780pt; height: 30pt;
+            }
+        }
+        body {
+            font-family: Helvetica, Arial, sans-serif;
+            font-size: 12pt;
+            line-height: 1.5;
+            color: #333;
+        }
+        .text-center { text-align: center; }
+        .text-right { text-align: right; }
+        .fw-bold { font-weight: bold; }
+        .header-title {
+            font-size: 14pt;
+            font-weight: bold;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+        }
+        .republica {
+            font-size: 11pt;
+            font-weight: bold;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+        }
+        .orgao {
+            font-size: 12pt;
+            font-weight: bold;
+            border-bottom: 1px solid #000;
+            padding-bottom: 5px;
+            margin-bottom: 20px;
+        }
+        .aviso-title {
+            font-size: 16pt;
+            font-weight: bold;
+            text-align: center;
+            margin-top: 30px;
+            margin-bottom: 30px;
+            text-decoration: underline;
+        }
+        p { margin-bottom: 15px; text-align: justify; }
+        .assinatura {
+            margin-top: 80px;
+            text-align: center;
+        }
+        .linha-assinatura {
+            width: 250px;
+            border-bottom: 1px solid #000;
+            margin: 0 auto 5px auto;
+        }
+        .data-emissao {
+            margin-top: 40px;
+            text-align: right;
+            font-style: italic;
+        }
+        ul { margin-bottom: 15px; }
+        li { margin-bottom: 5px; }
+    </style>
+</head>
+<body>
+
+    <div id="header_content" class="text-center">
+        <!-- Substituir por imagem estática do emblema de Moçambique se disponível -->
+        <!-- <img src="/static/img/emblema.png" width="60" style="margin-bottom: 10px;"> -->
+        <div class="republica">REPÚBLICA DE MOÇAMBIQUE</div>
+        <div class="orgao">SECRETARIADO TÉCNICO DE ADMINISTRAÇÃO ELEITORAL</div>
+    </div>
+
+    <div class="aviso-title">
+        AVISO DE ABERTURA DE CONCURSO
+    </div>
+
+    <p>
+        Faz-se público que, por despacho do Exmo. Senhor Diretor Geral do Secretariado Técnico de Administração Eleitoral, 
+        datado de {{ data_geracao|date:"d \d\e F \d\e Y" }}, está aberto o concurso para preenchimento de 
+        <span class="fw-bold">{{ vaga.numero_vagas }} ({% if vaga.numero_vagas == 1 %}uma{% else %}{{ vaga.numero_vagas }}{% endif %}) vaga{% if vaga.numero_vagas > 1 %}s{% endif %}</span> 
+        para a função de <span class="fw-bold">{{ vaga.titulo }}</span>.
+    </p>
+
+    <p>
+        <strong>1. Descrição e Requisitos da Vaga:</strong><br>
+        {{ vaga.descricao|linebreaksbr }}
+    </p>
+
+    <p>
+        <strong>2. Prazo e Local de Candidatura:</strong><br>
+        O prazo para a submissão de candidaturas decorre entre o dia <strong>{{ vaga.data_inicio|date:"d/m/Y" }}</strong> e 
+        <strong>{{ vaga.data_fim|date:"d/m/Y" }}</strong>. As candidaturas devem ser submetidas eletronicamente através 
+        do Sistema Integrado de Candidaturas.
+    </p>
+
+    <p>
+        <strong>3. Documentos Exigidos:</strong><br>
+        Os candidatos deverão apresentar os seguintes documentos na plataforma:
+    </p>
+    <ul>
+        {% if 'bi' in vaga.documentos_necessarios %}<li>Cópia do Bilhete de Identidade autenticada;</li>{% endif %}
+        {% if 'certificado' in vaga.documentos_necessarios %}<li>Certificado de Habilitações Literárias;</li>{% endif %}
+        {% if 'cv' in vaga.documentos_necessarios %}<li>Curriculum Vitae detalhado e atualizado;</li>{% endif %}
+        {% if 'foto' in vaga.documentos_necessarios %}<li>Fotografia tipo passe;</li>{% endif %}
+        <li>Outros documentos exigidos por lei para o provimento na Função Pública.</li>
+    </ul>
+
+    <p>
+        <strong>4. Método de Seleção:</strong><br>
+        Os candidatos admitidos na fase documental serão submetidos a uma entrevista técnica obrigatória. 
+        {% if vaga.requer_formacao %}
+        Os candidatos aprovados na entrevista deverão frequentar, com aproveitamento, uma ação de formação específica para a função.
+        {% endif %}
+    </p>
+
+    <div class="data-emissao">
+        Maputo, {{ data_geracao|date:"d \d\e F \d\e Y" }}
+    </div>
+
+    <div class="assinatura">
+        <div class="linha-assinatura"></div>
+        <div>O Diretor de Recursos Humanos</div>
+    </div>
+
+    <div id="footer_content" class="text-right" style="font-size: 9pt; color: #777;">
+        Página <pdf:pagenumber> de <pdf:pagecount> <br>
+        STAE - DRH - Gerado pelo SICFAE em {{ data_geracao|date:"d/m/Y H:i" }}
+    </div>
+
+</body>
+</html>

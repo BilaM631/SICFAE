@@ -1,0 +1,100 @@
+{% extends 'candidaturas/base.html' %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12 d-flex justify-content-between align-items-center">
+        <h2 class="text-success fw-bold">👋 Olá, {{ candidato.nome_completo }}</h2>
+        <a href="{% url 'candidaturas:logout_candidato' %}" class="btn btn-outline-danger btn-sm">Sair</a>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- Status Card -->
+    <div class="col-md-4">
+        <div class="card border-0 shadow h-100">
+            <div class="card-body text-center p-4">
+                <h5 class="text-muted mb-3">Estado da Candidatura</h5>
+
+                {% if candidato.estado == 'PENDENTE' %}
+                <div class="display-1 mb-2">⏳</div>
+                <span class="badge bg-warning text-dark fs-5 p-3 rounded-pill">Em Análise</span>
+                <p class="mt-3 text-muted">A sua documentação está a ser analisada.</p>
+
+                {% elif candidato.estado == 'DOCS_APROVADOS' %}
+                <div class="display-1 mb-2">✅</div>
+                <span class="badge bg-success fs-5 p-3 rounded-pill">Documentos Aprovados</span>
+                <p class="mt-3 text-muted">Aguarde o agendamento da entrevista.</p>
+
+                {% elif candidato.estado == 'DOCS_REJEITADOS' %}
+                <div class="display-1 mb-2">❌</div>
+                <span class="badge bg-danger fs-5 p-3 rounded-pill">Documentos Rejeitados</span>
+                <p class="mt-3 text-muted">Infelizmente sua candidatura não avançou.</p>
+
+                {% elif candidato.estado == 'ENTREVISTA_AGENDADA' %}
+                <div class="display-1 mb-2">🗓️</div>
+                <span class="badge bg-info text-dark fs-5 p-3 rounded-pill">Entrevista Agendada</span>
+                <p class="mt-3">Prepara-se para a sua entrevista!</p>
+
+                {% elif candidato.estado == 'ENTREVISTA_APROVADA' or candidato.estado == 'CONTRATADO' %}
+                <div class="display-1 mb-2">🎉</div>
+                <span class="badge bg-success fs-5 p-3 rounded-pill">Aprovado</span>
+                <p class="mt-3 text-success fw-bold">Parabéns! Você foi selecionado.</p>
+
+                {% elif candidato.estado == 'ENTREVISTA_REPROVADA' %}
+                <div class="display-1 mb-2">🚫</div>
+                <span class="badge bg-danger fs-5 p-3 rounded-pill">Não Aprovado</span>
+                <p class="mt-3 text-muted">Não atingiu os critérios na entrevista.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Details Card -->
+    <div class="col-md-8">
+        <div class="card border-0 shadow h-100">
+            <div class="card-header bg-white border-0 pt-4 px-4">
+                <h5 class="fw-bold mb-0">📋 Detalhes do Processo</h5>
+            </div>
+            <div class="card-body p-4">
+                <div class="list-group list-group-flush">
+                    <div class="list-group-item d-flex justify-content-between align-items-center py-3">
+                        <span class="text-muted">Vaga Candidatada</span>
+                        <span class="fw-bold">{{ candidato.vaga.titulo }}</span>
+                    </div>
+                    <div class="list-group-item d-flex justify-content-between align-items-center py-3">
+                        <span class="text-muted">Data de Registo</span>
+                        <span>{{ candidato.data_criacao|date:"d M Y" }}</span>
+                    </div>
+                    <div class="list-group-item d-flex justify-content-between align-items-center py-3">
+                        <span class="text-muted">BI</span>
+                        <span>{{ candidato.numero_bi }}</span>
+                    </div>
+                </div>
+
+                <!-- Interview Section -->
+                {% if candidato.estado == 'ENTREVISTA_AGENDADA' or candidato.estado == 'ENTREVISTA_APROVADA' or
+                candidato.estado == 'CONTRATADO' %}
+                <div class="mt-4 p-3 bg-light rounded-3 border-start border-4 border-info">
+                    <h6 class="fw-bold text-info mb-2">ℹ️ Informação da Entrevista</h6>
+                    <p class="mb-1">Local: <strong>Sede Distrital do STAE</strong></p>
+                    {% if candidato.data_entrevista %}
+                    <p class="mb-0">Data: <strong>{{ candidato.data_entrevista|date:"d M Y, H:i" }}</strong></p>
+                    {% else %}
+                    <p class="mb-0">Data: <strong>A definir (Aguarde SMS)</strong></p>
+                    {% endif %}
+                </div>
+                {% endif %}
+
+                <!-- Actions -->
+                <div class="mt-4">
+                    {% if candidato.estado != 'PENDENTE' and candidato.estado != 'DOCS_REJEITADOS' %}
+                    <a href="{% url 'candidaturas:gerar_pdf' candidato.pk %}" class="btn btn-outline-primary w-100">
+                        📄 Baixar Ficha de Inscrição (PDF)
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,137 @@
+{% extends 'formacao/base.html' %}
+
+{% block content %}
+<div class="min-vh-100 d-flex align-items-center justify-content-center bg-light py-5">
+    <div class="col-sm-10 col-md-6 col-lg-4">
+
+        <div class="card border-0 shadow-lg rounded-4 overflow-hidden">
+            <!-- Header colorido -->
+            <div class="bg-primary text-white px-4 py-4 text-center">
+                <div class="rounded-circle bg-white bg-opacity-25 d-inline-flex align-items-center justify-content-center mb-3"
+                    style="width: 70px; height: 70px;">
+                    <i class="bi bi-shield-lock-fill fs-1 text-white"></i>
+                </div>
+                <h4 class="fw-bold mb-1">Definir Nova Senha</h4>
+                <p class="mb-0 opacity-75 small">
+                    Por razões de segurança, deve definir uma senha pessoal antes de continuar.
+                </p>
+            </div>
+
+            <div class="card-body px-4 py-4">
+
+                {% if erros %}
+                <div class="alert alert-danger rounded-3 border-0 shadow-sm py-2">
+                    <ul class="mb-0 ps-3">
+                        {% for erro in erros %}
+                        <li class="small">{{ erro }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+
+                <form method="post" novalidate>
+                    {% csrf_token %}
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold small text-uppercase text-secondary">Nova Senha</label>
+                        <div class="input-group">
+                            <input type="password" name="nova_senha" id="novaSenha"
+                                class="form-control bg-light border-0 py-2"
+                                placeholder="Mínimo 8 caracteres" required autocomplete="new-password">
+                            <button class="btn btn-outline-secondary border-0 bg-light" type="button"
+                                id="toggleNova" onclick="toggleVisibility('novaSenha', 'iconNova')">
+                                <i class="bi bi-eye" id="iconNova"></i>
+                            </button>
+                        </div>
+                        <div id="forca-senha" class="mt-2"></div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label fw-bold small text-uppercase text-secondary">Confirmar Senha</label>
+                        <div class="input-group">
+                            <input type="password" name="confirmar_senha" id="confirmarSenha"
+                                class="form-control bg-light border-0 py-2"
+                                placeholder="Repita a nova senha" required autocomplete="new-password">
+                            <button class="btn btn-outline-secondary border-0 bg-light" type="button"
+                                onclick="toggleVisibility('confirmarSenha', 'iconConfirmar')">
+                                <i class="bi bi-eye" id="iconConfirmar"></i>
+                            </button>
+                        </div>
+                        <div id="match-status" class="mt-1 small"></div>
+                    </div>
+
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary fw-bold py-2">
+                            <i class="bi bi-check2-shield me-2"></i> Guardar Nova Senha
+                        </button>
+                    </div>
+                </form>
+
+                <div class="mt-3 alert alert-light border rounded-3 small text-muted px-3 py-2">
+                    <i class="bi bi-info-circle me-1"></i>
+                    Use pelo menos 8 caracteres. Recomendamos misturar letras, números e símbolos.
+                </div>
+            </div>
+        </div>
+
+        <p class="text-center text-muted small mt-3">
+            <i class="bi bi-lock me-1"></i> SICFAAE — Sistema de Informação e Controlo de Formação de Agentes Eleitorais
+        </p>
+    </div>
+</div>
+
+<script>
+    function toggleVisibility(inputId, iconId) {
+        const input = document.getElementById(inputId);
+        const icon = document.getElementById(iconId);
+        if (input.type === 'password') {
+            input.type = 'text';
+            icon.classList.replace('bi-eye', 'bi-eye-slash');
+        } else {
+            input.type = 'password';
+            icon.classList.replace('bi-eye-slash', 'bi-eye');
+        }
+    }
+
+    // Indicador de força da senha
+    document.getElementById('novaSenha').addEventListener('input', function () {
+        const val = this.value;
+        const container = document.getElementById('forca-senha');
+        let forca = 0;
+        if (val.length >= 8) forca++;
+        if (/[A-Z]/.test(val)) forca++;
+        if (/[0-9]/.test(val)) forca++;
+        if (/[^A-Za-z0-9]/.test(val)) forca++;
+
+        const labels = ['', 'Fraca', 'Razoável', 'Boa', 'Forte'];
+        const cores = ['', 'danger', 'warning', 'info', 'success'];
+        const pct = forca * 25;
+
+        if (val.length === 0) {
+            container.innerHTML = '';
+            return;
+        }
+
+        container.innerHTML = `
+            <div class="d-flex align-items-center gap-2">
+                <div class="progress flex-grow-1" style="height: 5px;">
+                    <div class="progress-bar bg-${cores[forca]}" style="width: ${pct}%"></div>
+                </div>
+                <span class="small text-${cores[forca]} fw-bold">${labels[forca]}</span>
+            </div>`;
+    });
+
+    // Verificação em tempo real de confirmação de senha
+    document.getElementById('confirmarSenha').addEventListener('input', function () {
+        const nova = document.getElementById('novaSenha').value;
+        const status = document.getElementById('match-status');
+        if (this.value === '') {
+            status.innerHTML = '';
+        } else if (this.value === nova) {
+            status.innerHTML = '<span class="text-success"><i class="bi bi-check-circle me-1"></i>As senhas coincidem</span>';
+        } else {
+            status.innerHTML = '<span class="text-danger"><i class="bi bi-x-circle me-1"></i>As senhas não coincidem</span>';
+        }
+    });
+</script>
+{% endblock %}

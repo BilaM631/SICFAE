@@ -1,0 +1,249 @@
+{% extends 'candidaturas/base.html' %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h2 class="fw-bold text-dark">{{ titulo_pagina|default:"Vaga" }}</h2>
+        <p class="text-secondary mb-0">Preencha os dados da vaga</p>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body p-4">
+                <form method="post" id="vagaForm">
+                    {% csrf_token %}
+
+                    <div class="mb-4">
+                        <label for="id_titulo" class="form-label fw-bold">Título da Vaga *</label>
+                        <input type="text" name="titulo" id="id_titulo"
+                            class="form-control form-control-lg {% if form.titulo.errors %}is-invalid{% endif %}"
+                            value="{{ form.titulo.value|default:'' }}" required maxlength="100">
+                        {% if form.titulo.errors %}
+                        <div class="invalid-feedback">{{ form.titulo.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="id_descricao" class="form-label fw-bold">Descrição</label>
+                        <textarea name="descricao" id="id_descricao"
+                            class="form-control {% if form.descricao.errors %}is-invalid{% endif %}"
+                            rows="4">{{ form.descricao.value|default:'' }}</textarea>
+                        <small class="text-muted">Descreva os requisitos e responsabilidades da vaga</small>
+                        {% if form.descricao.errors %}
+                        <div class="invalid-feedback">{{ form.descricao.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <label for="id_data_inicio" class="form-label fw-bold">Data de Início *</label>
+                            <input type="date" name="data_inicio" id="id_data_inicio"
+                                class="form-control {% if form.data_inicio.errors %}is-invalid{% endif %}"
+                                value="{{ form.data_inicio.value|date:'Y-m-d'|default:'' }}" required>
+                            {% if form.data_inicio.errors %}
+                            <div class="invalid-feedback">{{ form.data_inicio.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <label for="id_data_fim" class="form-label fw-bold">Data de Fim *</label>
+                            <input type="date" name="data_fim" id="id_data_fim"
+                                class="form-control {% if form.data_fim.errors %}is-invalid{% endif %}"
+                                value="{{ form.data_fim.value|date:'Y-m-d'|default:'' }}" required>
+                            {% if form.data_fim.errors %}
+                            <div class="invalid-feedback">{{ form.data_fim.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" name="ativa" id="id_ativa" 
+                                {% if form.ativa.value or form.ativa.value == None %}checked{% endif %}>
+                            <label class="form-check-label fw-bold" for="id_ativa">
+                                Vaga Ativa
+                            </label>
+                            <small class="d-block text-muted">Vagas ativas aparecem no formulário de candidatura</small>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" name="requer_formacao" id="id_requer_formacao" 
+                                {% if form.requer_formacao.value or form.requer_formacao.value == None %}checked{% endif %}>
+                            <label class="form-check-label fw-bold" for="id_requer_formacao">
+                                🎓 Requer Formação no DEFC
+                            </label>
+                            <small class="d-block text-muted">Candidatos aprovados serão enviados para formação.
+                                Desmarque se a contratação é direta.</small>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="{{ form.nivel_aprovacao.id_for_label }}" class="form-label fw-bold">🏛️ Nível de Aprovação *</label>
+                        {{ form.nivel_aprovacao }}
+                        <small class="text-muted d-block">Define para onde é a vaga (STAE Central, Provincial ou Distrital).</small>
+                        {% if form.nivel_aprovacao.errors %}
+                            <div class="invalid-feedback d-block">{{ form.nivel_aprovacao.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-4" id="div_provincia" style="display: none;">
+                        <label for="{{ form.provincia.id_for_label }}" class="form-label fw-bold">📍 Província</label>
+                        {{ form.provincia }}
+                        <small class="text-muted d-block mt-1">Deixe em branco se a vaga abranger Todas as Províncias/Distritos.</small>
+                        {% if form.provincia.errors %}
+                            <div class="invalid-feedback d-block">{{ form.provincia.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-4" id="div_distrito" style="display: none;">
+                        <label for="{{ form.distrito.id_for_label }}" class="form-label fw-bold">🏢 Distrito</label>
+                        {{ form.distrito }}
+                        <small class="text-muted d-block mt-1">Deixe em branco se a vaga abranger Todos os Distritos da Província selecionada.</small>
+                        {% if form.distrito.errors %}
+                            <div class="invalid-feedback d-block">{{ form.distrito.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">📄 Documentos Necessários</label>
+                        <small class="d-block text-muted mb-3">Selecione os documentos que os candidatos devem submeter
+                            para esta vaga</small>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-check mb-2">
+                                    {{ form.doc_bi }}
+                                    <label class="form-check-label" for="id_doc_bi">
+                                        📇 Bilhete de Identidade
+                                    </label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    {{ form.doc_certificado }}
+                                    <label class="form-check-label" for="id_doc_certificado">
+                                        🎓 Certificado de Habilitações
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-check mb-2">
+                                    {{ form.doc_cv }}
+                                    <label class="form-check-label" for="id_doc_cv">
+                                        📋 Curriculum Vitae
+                                    </label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    {{ form.doc_foto }}
+                                    <label class="form-check-label" for="id_doc_foto">
+                                        📸 Fotografia
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {% if form.non_field_errors %}
+                    <div class="alert alert-danger">
+                        {{ form.non_field_errors }}
+                    </div>
+                    {% endif %}
+
+                    <div class="d-flex justify-content-between mt-4">
+                        <a href="{% url 'candidaturas:lista_vagas' %}" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-left me-2"></i>Cancelar
+                        </a>
+                        <button type="submit" class="btn btn-primary px-4">
+                            <i class="bi bi-check-circle me-2"></i>{{ botao_texto|default:"Salvar" }}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card border-0 bg-light">
+            <div class="card-body">
+                <h6 class="fw-bold mb-3">💡 Dicas</h6>
+                <ul class="small text-muted">
+                    <li class="mb-2">Use um título claro e objetivo</li>
+                    <li class="mb-2">A descrição deve incluir requisitos mínimos</li>
+                    <li class="mb-2">Defina um período realista para candidaturas</li>
+                    <li class="mb-2">Vagas inativas não aparecem para candidatos</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const form = document.getElementById('vagaForm');
+        const dataInicio = document.getElementById('id_data_inicio');
+        const dataFim = document.getElementById('id_data_fim');
+
+        // Validação de datas
+        form.addEventListener('submit', function (e) {
+            if (dataInicio.value && dataFim.value) {
+                if (new Date(dataFim.value) < new Date(dataInicio.value)) {
+                    e.preventDefault();
+                    alert('A data de fim deve ser posterior à data de início.');
+                    dataFim.focus();
+                }
+            }
+        });
+
+        // Lógica de Vagas Provincia e Distrito
+        const nivelSelect = document.getElementById('{{ form.nivel_aprovacao.id_for_label }}');
+        const divProvincia = document.getElementById('div_provincia');
+        const divDistrito = document.getElementById('div_distrito');
+        const provinciaSelect = document.getElementById('{{ form.provincia.id_for_label }}');
+        const distritoSelect = document.getElementById('{{ form.distrito.id_for_label }}');
+
+        function toggleFields() {
+            if(!nivelSelect) return;
+            const nivel = nivelSelect.value;
+            if (nivel === 'CENTRAL') {
+                divProvincia.style.display = 'none';
+                divDistrito.style.display = 'none';
+            } else if (nivel === 'PROVINCIAL') {
+                divProvincia.style.display = 'block';
+                divDistrito.style.display = 'none';
+            } else if (nivel === 'DISTRITAL') {
+                divProvincia.style.display = 'block';
+                divDistrito.style.display = 'block';
+            }
+        }
+
+        if (nivelSelect) {
+            toggleFields();
+            nivelSelect.addEventListener('change', toggleFields);
+        }
+        
+        if (provinciaSelect) {
+            provinciaSelect.addEventListener('change', function() {
+                const provId = this.value;
+                if (provId) {
+                    fetch(`/candidaturas/ajax/carregar-distritos/?provincia=${provId}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            distritoSelect.innerHTML = '<option value="" selected>---------</option>';
+                            data.forEach(d => {
+                                const opt = document.createElement('option');
+                                opt.value = d.id;
+                                opt.textContent = d.nome;
+                                distritoSelect.appendChild(opt);
+                            });
+                        }).catch(err => console.error("Endpoint falhou", err));
+                } else {
+                    distritoSelect.innerHTML = '<option value="" selected>---------</option>';
+                }
+            });
+        }
+    });
+</script>
+{% endblock %}

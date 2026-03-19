@@ -1,0 +1,111 @@
+{% extends 'formacao/base.html' %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold text-dark mb-0">Gestão de Brigadas</h2>
+            <p class="text-muted">Unidades funcionais compostas por brigadistas certificados.</p>
+        </div>
+        <a href="{% url 'formacao:criar_brigada' %}" class="btn btn-primary d-flex align-items-center">
+            <i class="bi bi-plus-lg me-2"></i> Nova Brigada
+        </a>
+    </div>
+
+    <!-- Lista de Brigadas -->
+    <div class="row g-4">
+        {% for brigada in brigadas %}
+        <div class="col-md-6 col-lg-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white border-0 pt-4 px-4 d-flex justify-content-between align-items-start">
+                    <div>
+                        <h5 class="fw-bold mb-1">{{ brigada.nome }}</h5>
+                        <span class="badge bg-light text-primary border border-primary-subtle">
+                            <i class="bi bi-geo-alt me-1"></i> {{ brigada.distrito.nome }}
+                        </span>
+                    </div>
+                    {% if brigada.ativa %}
+                    <span class="badge bg-success-subtle text-success border border-success-subtle">Ativa</span>
+                    {% else %}
+                    <span class="badge bg-danger-subtle text-danger border border-danger-subtle">Inativa</span>
+                    {% endif %}
+                </div>
+                <div class="card-body px-4">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="avatar-group d-flex">
+                            {% for membro in brigada.membros.all|slice:":5" %}
+                            <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center border border-2 border-white" 
+                                 style="width: 32px; height: 32px; font-size: 10px; margin-left: -8px;"
+                                 title="{{ membro.nome_completo }}">
+                                {{ membro.nome_completo|slice:":1" }}
+                            </div>
+                            {% endfor %}
+                            {% if brigada.membros.count > 5 %}
+                            <div class="bg-light text-muted rounded-circle d-flex align-items-center justify-content-center border border-2 border-white" 
+                                 style="width: 32px; height: 32px; font-size: 10px; margin-left: -8px;">
+                                +{{ brigada.membros.count|add:"-5" }}
+                            </div>
+                            {% endif %}
+                        </div>
+                        <span class="small text-muted ms-3">{{ brigada.membros.count }} membros alocados</span>
+                    </div>
+                    
+                    <ul class="list-unstyled small mb-0">
+                        {% for membro in brigada.membros.all|slice:":3" %}
+                        <li class="mb-1 text-truncate">
+                            <i class="bi bi-person me-2 text-muted"></i>{{ membro.nome_completo }}
+                        </li>
+                        {% empty %}
+                        <li class="text-muted italic">Nenhum membro alocado</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                <div class="card-footer bg-light border-0 px-4 py-3 d-flex justify-content-end">
+                    <a href="{% url 'formacao:editar_brigada' brigada.pk %}" class="btn btn-sm btn-outline-primary me-2">
+                        <i class="bi bi-pencil me-1"></i> Editar
+                    </a>
+                    <a href="{% url 'formacao:apagar_brigada' brigada.pk %}" class="btn btn-sm btn-outline-danger">
+                        <i class="bi bi-trash"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <div class="card border-0 shadow-sm py-5 text-center text-muted">
+                <i class="bi bi-people fs-1 mb-3"></i>
+                <p>Nenhuma brigada registada.</p>
+                <div class="d-flex justify-content-center">
+                    <a href="{% url 'formacao:criar_brigada' %}" class="btn btn-primary btn-sm">Criar Primeira Brigada</a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Paginação -->
+    {% if is_paginated %}
+    <div class="mt-4">
+        <nav>
+            <ul class="pagination pagination-sm justify-content-center">
+                {% if page_obj.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Anterior</a>
+                </li>
+                {% endif %}
+                <li class="page-item active"><span class="page-link">{{ page_obj.number }}</span></li>
+                {% if page_obj.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.next_page_number }}">Próxima</a>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+    </div>
+    {% endif %}
+</div>
+
+<style>
+    .avatar-group .bg-primary:first-child { margin-left: 0; }
+</style>
+{% endblock %}

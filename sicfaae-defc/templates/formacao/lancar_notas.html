@@ -1,0 +1,113 @@
+{% extends 'formacao/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <!-- Header Page -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-1">
+                    <li class="breadcrumb-item"><a href="{% url 'formacao:dashboard_geral' %}" class="text-decoration-none">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'formacao:lista_turmas' %}" class="text-decoration-none">Turmas</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'formacao:detalhe_turma' turma.pk %}" class="text-decoration-none">{{ turma.nome }}</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Lançar Notas</li>
+                </ol>
+            </nav>
+            <h2 class="h3 mb-0 text-slate-800 fw-bold">
+                <i class="bi bi-pencil-square me-2 text-primary"></i>Lançamento em Massa: {{ turma.nome }}
+            </h2>
+            <p class="text-muted mb-0 mt-1">
+                Turma N° {{ turma.numero }} • {{ turma.get_tipo_formacao_display }} • {{ alunos_data|length }} Aluno(s)
+            </p>
+        </div>
+        <div>
+             <a href="{% url 'formacao:detalhe_turma' turma.pk %}" class="btn btn-outline-secondary">
+                 <i class="bi bi-arrow-left me-1"></i> Voltar à Turma
+             </a>
+        </div>
+    </div>
+
+    <!-- Tabela Lançamento -->
+    <div class="card border-0 shadow-sm">
+        <div class="card-header bg-white py-3">
+             <h5 class="fw-bold mb-0">Atribuir Classificações</h5>
+             <small class="text-muted">A percentagem de presença é opcional caso já registada automaticamente via sessões.</small>
+        </div>
+        <div class="card-body p-0">
+             <form method="post" id="form-notas">
+                 {% csrf_token %}
+                 <div class="table-responsive">
+                     <table class="table table-hover align-middle mb-0">
+                         <thead class="table-light">
+                             <tr>
+                                 <th class="ps-4">Código / BI</th>
+                                 <th>Nome do Aluno</th>
+                                 <th>Género</th>
+                                 <th style="width: 15%;">% Presença (0-100)</th>
+                                 <th style="width: 15%;">Nota Final (0-20)</th>
+                             </tr>
+                         </thead>
+                         <tbody>
+                             {% for item in alunos_data %}
+                             <tr>
+                                 <td class="ps-4 text-nowrap">
+                                     <strong>{{ item.aluno.codigo_candidato }}</strong><br>
+                                     <small class="text-muted">{{ item.aluno.numero_bi }}</small>
+                                 </td>
+                                 <td>
+                                     <div class="d-flex align-items-center">
+                                         <div class="avatar bg-primary-subtle text-primary rounded-circle me-3 d-flex align-items-center justify-content-center" style="width: 36px; height: 36px;">
+                                             {{ item.aluno.nome_completo.0 }}
+                                         </div>
+                                         <h6 class="mb-0">{{ item.aluno.nome_completo }}</h6>
+                                     </div>
+                                 </td>
+                                 <td>{{ item.aluno.get_genero_display }}</td>
+                                 <td>
+                                     <div class="input-group input-group-sm">
+                                         <input type="number" 
+                                                step="0.01" 
+                                                min="0" 
+                                                max="100" 
+                                                class="form-control" 
+                                                name="presenca_{{ item.aluno.id }}" 
+                                                value="{{ item.percentual_presenca|stringformat:'s' }}">
+                                         <span class="input-group-text">%</span>
+                                     </div>
+                                 </td>
+                                 <td class="pe-4">
+                                     <input type="number" 
+                                            step="0.01" 
+                                            min="0" 
+                                            max="20" 
+                                            class="form-control form-control-sm border-primary" 
+                                            name="nota_{{ item.aluno.id }}" 
+                                            value="{{ item.nota_final|stringformat:'s' }}"
+                                            placeholder="Ex: 15.5">
+                                 </td>
+                             </tr>
+                             {% empty %}
+                             <tr>
+                                 <td colspan="5" class="text-center py-5 text-muted">
+                                     <i class="bi bi-person-x fs-1 d-block mb-2 text-black-50"></i>
+                                     Nenhum aluno está associado a esta turma.
+                                 </td>
+                             </tr>
+                             {% endfor %}
+                         </tbody>
+                     </table>
+                 </div>
+                 
+                 {% if alunos_data %}
+                 <div class="card-footer bg-light py-3 d-flex justify-content-end align-items-center gap-2">
+                      <button type="submit" class="btn btn-primary px-4 shadow-sm" id="btn-save" onclick="this.innerHTML='<span class=\'spinner-border spinner-border-sm\' role=\'status\' aria-hidden=\'true\'></span> Gravando...';">
+                           <i class="bi bi-save me-2"></i> Gravar Notas e Emitir Certificados
+                      </button>
+                 </div>
+                 {% endif %}
+             </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

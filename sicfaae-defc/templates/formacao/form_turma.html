@@ -1,0 +1,263 @@
+{% extends 'formacao/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-9">
+            <div class="card shadow-sm rounded-4 border-0">
+                <div class="card-header bg-primary text-white rounded-top-4 py-3">
+                    <h5 class="mb-0 fw-bold">
+                        <i class="bi bi-journal-plus me-2"></i>
+                        {% if object %}Editar{% else %}Criar{% endif %} Turma de Formação
+                    </h5>
+                </div>
+                <div class="card-body p-4">
+                    {% if form.errors %}
+                    <div class="alert alert-danger rounded-3">
+                        <h6 class="fw-bold"><i class="bi bi-exclamation-triangle-fill me-2"></i>Por favor corrija os seguintes erros:</h6>
+                        <ul class="mb-0">
+                        {% for field in form %}
+                            {% for error in field.errors %}
+                                <li><strong>{{ field.label }}:</strong> {{ error }}</li>
+                            {% endfor %}
+                        {% endfor %}
+                        {% for error in form.non_field_errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                        </ul>
+                    </div>
+                    {% endif %}
+
+                    <form method="post">
+                        {% csrf_token %}
+
+                        <!-- Tipo de Formação (primeiro, pois controla os outros campos) -->
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">Tipo de Formação</label>
+                            {{ form.tipo_formacao }}
+                            {% if form.tipo_formacao.errors %}
+                            <div class="text-danger small mt-1">{{ form.tipo_formacao.errors }}</div>
+                            {% endif %}
+                            <div id="tipo-info" class="form-text mt-1"></div>
+                        </div>
+
+                        <div class="row g-3">
+                            <!-- Nome -->
+                            <div class="col-md-12">
+                                <label class="form-label fw-bold">Nome da Turma</label>
+                                {{ form.nome }}
+                                {% if form.nome.errors %}
+                                <div class="text-danger small">{{ form.nome.errors }}</div>
+                                {% endif %}
+                            </div>
+
+                            <!-- Campo Provincia (só para Formadores Nacionais) -->
+                            <div class="col-md-6" id="campo-provincia" style="display:none;">
+                                <label class="form-label fw-bold text-primary">
+                                    <i class="bi bi-building me-1"></i>Direção Provincial
+                                    <span class="badge bg-primary ms-1" style="font-size:.65rem;">Formadores
+                                        Nacionais</span>
+                                </label>
+                                {{ form.provincia }}
+                                {% if form.provincia.errors %}
+                                <div class="text-danger small">{{ form.provincia.errors }}</div>
+                                {% endif %}
+                                <div class="form-text">Seleccione a Direção Provincial onde ocorre a formação</div>
+                            </div>
+
+                            <!-- Campo Distrito (para todos os outros tipos) -->
+                            <div class="col-md-6" id="campo-distrito">
+                                <label class="form-label fw-bold">Distrito</label>
+                                {{ form.distrito }}
+                                {% if form.distrito.errors %}
+                                <div class="text-danger small">{{ form.distrito.errors }}</div>
+                                {% endif %}
+                            </div>
+
+                            <!-- Local -->
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Local de Formação</label>
+                                {{ form.local }}
+                                <datalist id="locais-datalist">
+                                    {% for loc_nome in locais_disponiveis %}
+                                    <option value="{{ loc_nome }}">
+                                    {% endfor %}
+                                </datalist>
+                                {% if form.local.errors %}
+                                <div class="text-danger small">{{ form.local.errors }}</div>
+                                {% endif %}
+                            </div>
+
+                            <!-- Número -->
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Número da Turma</label>
+                                {{ form.numero }}
+                                <div class="form-text">Número sequencial dentro do distrito/tipo (1 a 35)</div>
+                                {% if form.numero.errors %}
+                                <div class="text-danger small">{{ form.numero.errors }}</div>
+                                {% endif %}
+                            </div>
+
+                            <!-- Datas -->
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Data de Início</label>
+                                {{ form.data_inicio }}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Data de Fim</label>
+                                {{ form.data_fim }}
+                            </div>
+
+                            <!-- Configurações Pedagógicas -->
+                            <div class="col-md-4 mt-3">
+                                <label class="form-label fw-bold small text-muted">Carga Horária (h)</label>
+                                {{ form.carga_horaria_prevista }}
+                                {% if form.carga_horaria_prevista.errors %}
+                                <div class="text-danger small">{{ form.carga_horaria_prevista.errors }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-4 mt-3">
+                                <label class="form-label fw-bold small text-muted">Presença Mínima (%)</label>
+                                {{ form.percentual_presenca_minimo }}
+                                {% if form.percentual_presenca_minimo.errors %}
+                                <div class="text-danger small">{{ form.percentual_presenca_minimo.errors }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-4 mt-3">
+                                <label class="form-label fw-bold small text-muted">Nota Mín. (0 a 20)</label>
+                                {{ form.nota_minima_aprovacao }}
+                                {% if form.nota_minima_aprovacao.errors %}
+                                <div class="text-danger small">{{ form.nota_minima_aprovacao.errors }}</div>
+                                {% endif %}
+                            </div>
+
+                            <!-- Formadores -->
+                            <div class="col-md-12">
+                                <label class="form-label fw-bold">Formadores</label>
+                                <div id="formadores-info"
+                                    class="alert alert-warning border-0 py-2 px-3 rounded-3 mb-2 small"
+                                    style="display:none;">
+                                    <i class="bi bi-info-circle me-1"></i>
+                                    <span id="formadores-info-text"></span>
+                                </div>
+                                {{ form.formadores }}
+                                <div class="form-text">{{ form.formadores.help_text }} (segure <kbd>Ctrl</kbd> para
+                                    múltiplos)</div>
+                                {% if form.formadores.errors %}
+                                <div class="text-danger small">{{ form.formadores.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-end gap-2 mt-4">
+                            <a href="{% url 'formacao:lista_turmas' %}" class="btn btn-outline-secondary">Cancelar</a>
+                            <button type="submit" class="btn btn-primary shadow-sm px-4">
+                                <i class="bi bi-save me-1"></i>
+                                {% if object %}Guardar Alterações{% else %}Criar Turma{% endif %}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const TIPOS_FORMADORES_NACIONAIS = ['FORMADORES_NACIONAIS'];
+    const TIPOS_CAMPO = ['BRIGADISTAS', 'MMV', 'AGENTES_EDUCACAO'];
+
+    const tipoInfoMessages = {
+        'FORMADORES_NACIONAIS': 'Formação ocorre na Direção Provincial. Seleccione a Província.',
+        'FORMADORES_PROVINCIAIS': 'Formação ocorre a nível Provincial. Seleccione o Distrito.',
+        'FORMADORES': 'Formação de Formadores. Seleccione o Distrito.',
+        'BRIGADISTAS': 'Formação de Brigadistas (3 por brigada). Seleccione o Distrito.',
+        'MMV': 'Formação de Membros de Mesas de Voto. Seleccione o Distrito.',
+        'AGENTES_EDUCACAO': 'Formação de Agentes de Educação Cívica. Seleccione o Distrito.',
+    };
+
+    const formadoresInfo = {
+        'BRIGADISTAS': 'A mostrar apenas formadores especializados em Brigadistas.',
+        'MMV': 'A mostrar apenas formadores especializados em MMV.',
+        'AGENTES_EDUCACAO': 'A mostrar apenas formadores especializados em Educação Cívica.',
+    };
+
+    function handleTipoFormacaoChange(tipo) {
+        const campoProvincia = document.getElementById('campo-provincia');
+        const campoDistrito = document.getElementById('campo-distrito');
+        const tipoInfoEl = document.getElementById('tipo-info');
+        const formadoresInfoEl = document.getElementById('formadores-info');
+        const formadoresInfoText = document.getElementById('formadores-info-text');
+
+        // Mostrar/ocultar Província vs Distrito
+        if (TIPOS_FORMADORES_NACIONAIS.includes(tipo)) {
+            campoProvincia.style.display = 'block';
+            campoDistrito.style.display = 'none';
+        } else {
+            campoProvincia.style.display = 'none';
+            campoDistrito.style.display = 'block';
+        }
+
+        // Info do tipo
+        tipoInfoEl.textContent = tipoInfoMessages[tipo] || '';
+
+        // Info dos formadores
+        if (formadoresInfo[tipo]) {
+            formadoresInfoText.textContent = formadoresInfo[tipo];
+            formadoresInfoEl.style.display = 'block';
+        } else {
+            formadoresInfoEl.style.display = 'none';
+        }
+    }
+
+    // Executar ao carregar com o valor actual
+    window.addEventListener('DOMContentLoaded', function () {
+        const sel = document.getElementById('id_tipo_formacao');
+        if (sel) handleTipoFormacaoChange(sel.value);
+    });
+
+    // Inicializar Select2 para campos fáceis
+    $(document).ready(function() {
+        $('#id_distrito, #id_provincia, #id_tipo_formacao').select2({
+            theme: 'bootstrap-5',
+            width: '100%',
+            placeholder: 'Seleccione uma opção',
+            allowClear: true
+        });
+        
+        // Inicializar Select2 para Formadores com AJAX Dinâmico
+        const formadoresSelect = $('#id_formadores');
+        
+        formadoresSelect.select2({
+            theme: 'bootstrap-5',
+            width: '100%',
+            placeholder: 'Seleccione um ou mais formadores',
+            allowClear: true,
+            closeOnSelect: false,
+            ajax: {
+                url: "{% url 'formacao:api_formadores_disponiveis' %}",
+                dataType: 'json',
+                delay: 250,
+                data: function (params) {
+                    return {
+                        tipo: $('#id_tipo_formacao').val(), // Passa o tipo actual seleccionado na página
+                        q: params.term // Palavra a pesquisar (opcional)
+                    };
+                },
+                processResults: function (data) {
+                    return {
+                        results: data.results
+                    };
+                },
+                cache: true
+            }
+        });
+
+        // Quando o tipo de formação muda, limpar a lista actual de formadores para forçar nova recolha
+        $('#id_tipo_formacao').on('change', function() {
+            formadoresSelect.val(null).trigger('change');
+        });
+    });
+</script>
+{% endblock %}

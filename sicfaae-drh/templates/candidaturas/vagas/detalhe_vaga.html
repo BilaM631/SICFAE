@@ -1,0 +1,274 @@
+{% extends 'candidaturas/base.html' %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12 d-flex justify-content-between align-items-center">
+        <div>
+            <h2 class="fw-bold text-dark">{{ vaga.titulo }}</h2>
+            <p class="text-secondary mb-2">Detalhes da vaga</p>
+            {% if vaga.ativa %}
+            <span class="badge bg-success">🟢 Vaga Ativa</span>
+            {% else %}
+            <span class="badge bg-danger">🔴 Vaga Inativa</span>
+            {% endif %}
+            {% if vaga.concurso_aberto %}
+            <span class="badge bg-info ms-1 text-dark">📜 Concurso Aberto ({{ vaga.numero_vagas }} vagas)</span>
+            {% endif %}
+        </div>
+        <div>
+            {% if pode_enviar_aprovados %}
+            <form action="{% url 'candidaturas:enviar_aprovados_vaga_formacao' vaga.pk %}" method="post" class="d-inline">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-warning me-2 fw-bold text-dark" onclick="return confirm('Tem certeza que deseja enviar de forma massiva e de uma só vez TODOS os {{ candidatos_aprovados }} candidatos aprovados para o portal de Formação DEFC?')">
+                    <i class="bi bi-airplane-fill me-2"></i>Enviar Aprovados para DEFC ({{ candidatos_aprovados }})
+                </button>
+            </form>
+            {% endif %}
+            
+            {% if not vaga.concurso_aberto %}
+            <a href="{% url 'candidaturas:abrir_concurso' vaga.pk %}" class="btn btn-warning me-2 fw-bold text-dark">
+                <i class="bi bi-megaphone me-2"></i>Abrir Concurso
+            </a>
+            {% elif vaga.documento_concurso %}
+            <a href="{{ vaga.documento_concurso.url }}" target="_blank" class="btn btn-success me-2 fw-bold">
+                <i class="bi bi-file-earmark-pdf me-2"></i>Documento Oficial
+            </a>
+            {% endif %}
+            
+            <a href="{% url 'candidaturas:editar_vaga' vaga.pk %}" class="btn btn-outline-primary me-2">
+                <i class="bi bi-pencil me-2"></i>Editar
+            </a>
+            <a href="{% url 'candidaturas:lista_vagas' %}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left me-2"></i>Voltar
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Informações da Vaga -->
+<div class="row mb-4">
+    <div class="col-md-8">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body p-4">
+                <h5 class="fw-bold mb-3">📄 Informações</h5>
+
+                <div class="mb-3">
+                    <label class="text-muted small">Título</label>
+                    <div class="fw-bold">{{ vaga.titulo }}</div>
+                </div>
+
+                {% if vaga.descricao %}
+                <div class="mb-3">
+                    <label class="text-muted small">Descrição</label>
+                    <div>{{ vaga.descricao|linebreaks }}</div>
+                </div>
+                {% endif %}
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="text-muted small">Data de Início</label>
+                        <div class="fw-bold">{{ vaga.data_inicio|date:"d/m/Y" }}</div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="text-muted small">Data de Fim</label>
+                        <div class="fw-bold">{{ vaga.data_fim|date:"d/m/Y" }}</div>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="text-muted small">Tipo de Contratação</label>
+                    <div class="fw-bold">
+                        {% if vaga.requer_formacao %}
+                        <span class="badge bg-primary">🎓 Com Formação no DEFC</span>
+                        {% else %}
+                        <span class="badge bg-success">💼 Contratação Direta</span>
+                        {% endif %}
+                    </div>
+                    <div class="mt-2">
+                        <span
+                            class="badge {% if vaga.nivel_aprovacao == 'CENTRAL' %}bg-danger{% elif vaga.nivel_aprovacao == 'PROVINCIAL' %}bg-warning text-dark{% else %}bg-info text-dark{% endif %}">
+                            📍 Destino: {{ vaga.get_nivel_aprovacao_display }}
+                            {% if vaga.nivel_aprovacao == 'PROVINCIAL' %} 
+                                - {% if vaga.provincia %}{{ vaga.provincia.nome }}{% else %}Todas as Províncias{% endif %}
+                            {% endif %}
+                            {% if vaga.nivel_aprovacao == 'DISTRITAL' %} 
+                                - {% if vaga.distrito %}{{ vaga.distrito.nome }} ({{ vaga.distrito.provincia.nome }}){% else %}Todos os Distritos{% endif %}
+                            {% endif %}
+                        </span>
+                    </div>
+                    <small class="text-muted">
+                        {% if vaga.requer_formacao %}
+                        Candidatos aprovados serão enviados para formação
+                        {% else %}
+                        Candidatos aprovados serão contratados diretamente
+                        {% endif %}
+                    </small>
+                </div>
+
+                <div class="mb-3">
+                    <label class="text-muted small">Documentos Necessários</label>
+                    <div>
+                        {% if vaga.documentos_necessarios %}
+                        {% for doc in vaga.documentos_necessarios %}
+                        <span class="badge bg-secondary me-1 mb-1">
+                            {% if doc == 'bi' %}📇 BI
+                            {% elif doc == 'certificado' %}🎓 Certificado
+                            {% elif doc == 'cv' %}📋 CV
+                            {% elif doc == 'foto' %}📸 Foto
+                            {% endif %}
+                        </span>
+                        {% endfor %}
+                        {% else %}
+                        <span class="text-muted">Nenhum documento especificado</span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="text-muted small">Criada em</label>
+                        <div>{{ vaga.data_criacao|date:"d/m/Y H:i" }}</div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="text-muted small">Última atualização</label>
+                        <div>{{ vaga.data_atualizacao|date:"d/m/Y H:i" }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Estatísticas -->
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm mb-3">
+            <div class="card-body text-center">
+                <h1 class="display-4 fw-bold text-primary mb-0">{{ total_candidatos }}</h1>
+                <small class="text-muted">Total de Candidatos</small>
+            </div>
+        </div>
+
+        <div class="card border-0 shadow-sm">
+            <div class="card-body">
+                <h6 class="fw-bold mb-3">📊 Por Estado</h6>
+                <div class="d-flex justify-content-between mb-2">
+                    <span class="text-muted small">Pendentes</span>
+                    <span class="badge bg-warning">{{ candidatos_pendentes }}</span>
+                </div>
+
+                <div class="d-flex justify-content-between mb-2">
+                    <span class="text-muted small">Entrevista Agendada</span>
+                    <span class="badge bg-primary">{{ candidatos_entrevista_agendada }}</span>
+                </div>
+                <div class="d-flex justify-content-between mb-2">
+                    <span class="text-muted small">Aprovados</span>
+                    <span class="badge bg-success">{{ candidatos_aprovados }}</span>
+                </div>
+                <div class="d-flex justify-content-between">
+                    <span class="text-muted small">Enviados DEFC</span>
+                    <span class="badge bg-secondary">{{ candidatos_enviados_defc }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Secção de Entrevistadores da Vaga -->
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+        <h5 class="fw-bold mb-0">👨‍💼 Entrevistadores Alocados a esta Vaga</h5>
+        <a href="{% url 'candidaturas:adicionar_entrevistador_vaga' vaga.pk %}" class="btn btn-sm btn-primary">
+            <i class="bi bi-plus-circle me-1"></i>Novo Entrevistador
+        </a>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table align-middle mb-0">
+                <thead class="bg-light">
+                    <tr>
+                        <th>Nome</th>
+                        <th>Código de Acesso</th>
+                        <th>Adicionado em</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for entrevistador in vaga.entrevistadores.all %}
+                    <tr>
+                        <td class="fw-bold">{{ entrevistador.nome }}</td>
+                        <td>
+                            <code class="fs-6 user-select-all">{{ entrevistador.codigo_acesso }}</code>
+                        </td>
+                        <td class="text-muted small">{{ entrevistador.data_criacao|date:"d/m/Y H:i" }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="3" class="text-center text-muted py-4">
+                            Nenhum entrevistador alocado a esta vaga.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Lista de Candidatos Recentes -->
+<div class="card border-0 shadow-sm">
+    <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+        <h5 class="fw-bold mb-0">👥 Candidatos Recentes</h5>
+        {% if total_candidatos > 0 %}
+        <a href="{% url 'candidaturas:lista_verificacao' %}?vaga={{ vaga.id }}" class="btn btn-sm btn-outline-primary">
+            Ver Todos
+        </a>
+        {% endif %}
+    </div>
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="bg-light">
+                <tr>
+                    <th class="ps-4">Código</th>
+                    <th>Nome</th>
+                    <th>BI</th>
+                    <th>Estado</th>
+                    <th class="text-end pe-4">Data</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for candidato in candidatos_recentes %}
+                <tr>
+                    <td class="ps-4">
+                        <span class="badge bg-secondary">{{ candidato.codigo_candidato|default:"---" }}</span>
+                    </td>
+                    <td class="fw-bold">
+                        <a href="{% url 'candidaturas:detalhe_candidato' candidato.pk %}" class="text-decoration-none">
+                            {{ candidato.nome_completo }}
+                        </a>
+                    </td>
+                    <td>{{ candidato.numero_bi }}</td>
+                    <td>
+                        <span class="badge 
+                            {% if candidato.estado == 'PENDENTE' %}bg-warning
+                            {% elif candidato.estado == 'ENTREVISTA_APROVADA' %}bg-success
+                            {% elif candidato.estado == 'ENVIADO_DEFC' %}bg-secondary
+                            {% else %}bg-light text-dark
+                            {% endif %}">
+                            {{ candidato.get_estado_display }}
+                        </span>
+                    </td>
+                    <td class="text-end pe-4 text-muted small">
+                        {{ candidato.data_criacao|date:"d/m/Y" }}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" class="text-center text-muted py-5">
+                        <i class="bi bi-inbox fs-1 d-block mb-3"></i>
+                        Nenhum candidato para esta vaga ainda.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

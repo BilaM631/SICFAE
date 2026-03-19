@@ -1,0 +1,142 @@
+{% extends 'candidaturas/base.html' %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12 d-flex justify-content-between align-items-center">
+        <div>
+            <h2 class="fw-bold text-dark">📋 Gestão de Vagas</h2>
+            <p class="text-secondary mb-0">Gerir vagas de emprego disponíveis</p>
+        </div>
+        <a href="{% url 'candidaturas:criar_vaga_etapa1' %}" class="btn btn-primary">
+            <i class="bi bi-plus-circle me-2"></i>Nova Vaga
+        </a>
+    </div>
+</div>
+
+<!-- Filtros -->
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-body">
+        <form method="get" class="row g-3">
+            <div class="col-md-4">
+                <input type="text" name="search" class="form-control" placeholder="Pesquisar por título..."
+                    value="{{ search_query }}">
+            </div>
+            <div class="col-md-3">
+                <select name="status" class="form-select">
+                    <option value="todas" {% if status_atual == 'todas' %}selected{% endif %}>Todas</option>
+                    <option value="ativas" {% if status_atual == 'ativas' %}selected{% endif %}>Ativas</option>
+                    <option value="inativas" {% if status_atual == 'inativas' %}selected{% endif %}>Inativas</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-outline-primary w-100">
+                    <i class="bi bi-search me-2"></i>Filtrar
+                </button>
+            </div>
+            <div class="col-md-3 text-end">
+                <a href="{% url 'candidaturas:lista_vagas' %}" class="btn btn-outline-secondary w-100">Limpar</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Lista de Vagas -->
+<div class="card border-0 shadow-sm">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="bg-light">
+                <tr>
+                    <th class="ps-4">Título</th>
+                    <th>Período</th>
+                    <th class="text-center">Candidatos</th>
+                    <th class="text-center">Status</th>
+                    <th class="text-end pe-4">Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for vaga in vagas %}
+                <tr>
+                    <td class="ps-4">
+                        <div class="fw-bold">{{ vaga.titulo }}</div>
+                        {% if vaga.descricao %}
+                        <small class="text-muted">{{ vaga.descricao|truncatewords:10 }}</small>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <small class="text-muted">
+                            {{ vaga.data_inicio|date:"d/m/Y" }} - {{ vaga.data_fim|date:"d/m/Y" }}
+                        </small>
+                    </td>
+                    <td class="text-center">
+                        <span class="badge bg-secondary rounded-pill">{{ vaga.candidatos.count }}</span>
+                    </td>
+                    <td class="text-center">
+                        {% if vaga.ativa %}
+                        <span class="badge bg-success">🟢 Ativa</span>
+                        {% else %}
+                        <span class="badge bg-danger">🔴 Inativa</span>
+                        {% endif %}
+                    </td>
+                    <td class="text-end pe-4">
+                        <div class="btn-group btn-group-sm" role="group">
+                            <a href="{% url 'candidaturas:detalhe_vaga' vaga.pk %}" class="btn btn-outline-primary"
+                                title="Ver Detalhes">
+                                <i class="bi bi-eye"></i>
+                            </a>
+                            <a href="{% url 'candidaturas:editar_vaga' vaga.pk %}" class="btn btn-outline-secondary"
+                                title="Editar">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                            <a href="{% url 'candidaturas:apagar_vaga' vaga.pk %}" class="btn btn-outline-danger"
+                                title="Apagar Vaga">
+                                <i class="bi bi-trash"></i>
+                            </a>
+                            <a href="{% url 'candidaturas:alternar_status_vaga' vaga.pk %}"
+                                class="btn btn-outline-{% if vaga.ativa %}danger{% else %}success{% endif %}"
+                                title="{% if vaga.ativa %}Desativar{% else %}Ativar{% endif %}"
+                                onclick="return confirm('Tem certeza que deseja {% if vaga.ativa %}desativar{% else %}ativar{% endif %} esta vaga?')">
+                                <i class="bi bi-{% if vaga.ativa %}x-circle{% else %}check-circle{% endif %}"></i>
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" class="text-center text-muted py-5">
+                        <i class="bi bi-inbox fs-1 d-block mb-3"></i>
+                        Nenhuma vaga encontrada.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Paginação -->
+    {% if is_paginated %}
+    <div class="card-footer bg-white">
+        <nav>
+            <ul class="pagination justify-content-center mb-0">
+                {% if page_obj.has_previous %}
+                <li class="page-item">
+                    <a class="page-link"
+                        href="?page={{ page_obj.previous_page_number }}{% if status_atual != 'todas' %}&status={{ status_atual }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}">Anterior</a>
+                </li>
+                {% endif %}
+
+                <li class="page-item active">
+                    <span class="page-link">Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+                </li>
+
+                {% if page_obj.has_next %}
+                <li class="page-item">
+                    <a class="page-link"
+                        href="?page={{ page_obj.next_page_number }}{% if status_atual != 'todas' %}&status={{ status_atual }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}">Próxima</a>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

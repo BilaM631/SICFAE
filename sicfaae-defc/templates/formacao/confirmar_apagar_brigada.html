@@ -1,0 +1,30 @@
+{% extends 'formacao/base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-5 text-center">
+                    <div class="text-danger mb-4">
+                        <i class="bi bi-exclamation-triangle fs-1"></i>
+                    </div>
+                    <h3 class="fw-bold mb-3">Apagar Brigada?</h3>
+                    <p class="text-muted mb-4">
+                        Tem a certeza que deseja apagar a brigada <strong>{{ object.nome }}</strong>?<br>
+                        Esta ação não removerá os brigadistas do sistema, apenas desfará esta unidade funcional.
+                    </p>
+                    
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-center">
+                            <a href="{% url 'formacao:lista_brigadas' %}" class="btn btn-outline-secondary px-4">Cancelar</a>
+                            <button type="submit" class="btn btn-danger px-4">Sim, Apagar Brigada</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

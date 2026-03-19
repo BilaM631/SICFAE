@@ -1,0 +1,178 @@
+{% extends 'candidaturas/base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Cabeçalho da Turma -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body p-4">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <h2 class="fw-bold text-primary mb-1">{{ turma.nome }}</h2>
+                    <p class="text-secondary mb-0">
+                        <i class="bi bi-geo-alt me-1"></i> {{ turma.distrito }}
+                        {% if turma.local %}
+                        • <strong>{{ turma.local.nome }}</strong>
+                        {% endif %}
+                        <span class="mx-2">•</span>
+                        <span class="badge bg-secondary">Turma Nº {{ turma.numero }}</span>
+                    </p>
+                    {% if turma.formadores.exists %}
+                    <div class="mt-2">
+                        <small class="fw-bold text-muted text-uppercase">Formadores:</small>
+                        {% for f in turma.formadores.all %}
+                        <span class="badge bg-info text-dark me-1">{{ f.nome_completo|truncatechars:20 }}</span>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+                <div>
+                    <!-- Botões de Ação (Editar, etc) - Futuro -->
+                </div>
+            </div>
+            <hr>
+            <div class="row">
+                <div class="col-md-3">
+                    <small class="text-uppercase text-muted fw-bold">Período</small>
+                    <p class="mb-0">
+                        {% if turma.data_inicio %}
+                        {{ turma.data_inicio|date:"d/m/Y" }} - {{ turma.data_fim|date:"d/m/Y" }}
+                        {% else %}
+                        Não definido
+                        {% endif %}
+                    </p>
+                </div>
+                <div class="col-md-3">
+                    <small class="text-uppercase text-muted fw-bold">Total Alunos</small>
+                    <p class="mb-0 fs-5 fw-bold">{{ alunos.count }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lista de Alunos -->
+    <div class="card border-0 shadow-sm">
+        <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+            <h5 class="fw-bold mb-0">Alunos Inscritos</h5>
+            <!-- Botão para adicionar alunos -->
+            <button class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#addAlunoModal">
+                <i class="bi bi-person-plus me-1"></i> Adicionar Alunos
+            </button>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="bg-light">
+                    <tr>
+                        <th class="ps-4">Nome Completo</th>
+                        <th>BI</th>
+                        <th>Género</th>
+                        <th>Telefone</th>
+                        <th class="text-end pe-4">Ação</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for aluno in alunos %}
+                    <tr>
+                        <td class="ps-4 fw-bold">{{ aluno.nome_completo }}</td>
+                        <td>{{ aluno.numero_bi }}</td>
+                        <td>{{ aluno.get_genero_display }}</td>
+                        <td>{{ aluno.numero_telefone }}</td>
+                        <td class="text-end pe-4">
+                            <form action="#" method="post" class="d-inline"
+                                onsubmit="return confirm('Remover aluno desta turma?');">
+                                {% csrf_token %}
+                                <input type="hidden" name="remover_aluno_id" value="{{ aluno.id }}">
+                                <button type="submit" class="btn btn-link text-danger p-0" title="Remover da Turma">
+                                    <i class="bi bi-x-circle"></i>
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="text-center py-5 text-muted">
+                            Esta turma ainda não tem alunos.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block modals %}
+<!-- Modal Adicionar Alunos -->
+<div class="modal fade" id="addAlunoModal" tabindex="-1" aria-hidden="true" style="z-index: 1060;">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <form method="post" action="{% url 'formacao:detalhe_turma' turma.pk %}">
+                {% csrf_token %}
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold">Adicionar Alunos à Turma</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="text-muted">Selecione os candidatos <strong>Em Formação</strong> disponíveis neste
+                        distrito.</p>
+
+                    <div class="table-responsive border rounded" style="max-height: 400px; overflow-y: auto;">
+                        <table class="table table-hover table-sm mb-0 align-middle">
+                            <thead class="bg-light sticky-top">
+                                <tr>
+                                    <th class="ps-3 text-center" style="width: 50px;">
+                                        <input class="form-check-input" type="checkbox" id="checkAll"
+                                            onclick="toggleAll(this)">
+                                    </th>
+                                    <th>Nome</th>
+                                    <th>BI</th>
+                                    <th>Vaga</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for c in candidatos_disponiveis %}
+                                <tr onclick="document.getElementById('check_{{ c.id }}').click()"
+                                    style="cursor: pointer;">
+                                    <td class="ps-3 text-center" onclick="event.stopPropagation()">
+                                        <input class="form-check-input candidate-check" type="checkbox"
+                                            name="candidatos_ids" value="{{ c.id }}" id="check_{{ c.id }}">
+                                    </td>
+                                    <td>
+                                        <span class="fw-bold">{{ c.nome_completo }}</span>
+                                    </td>
+                                    <td><small class="text-muted">{{ c.numero_bi }}</small></td>
+                                    <td>
+                                        <span class="badge bg-secondary bg-opacity-10 text-secondary">
+                                            {{ c.vaga.titulo|default:"Sem Vaga" }}
+                                        </span>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="4" class="text-center py-5 text-muted">
+                                        <i class="bi bi-person-x fs-1 d-block mb-3"></i>
+                                        Não há candidatos disponíveis neste distrito.
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <script>
+                    function toggleAll(source) {
+                        const checkboxes = document.querySelectorAll('.candidate-check');
+                        checkboxes.forEach(cb => cb.checked = source.checked);
+                    }
+                </script>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                    <button type="submit" class="btn btn-success">Adicionar Selecionados</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

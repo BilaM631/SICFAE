@@ -1,0 +1,54 @@
+{% extends 'candidaturas/base.html' %}
+
+{% block content %}
+<div class="row justify-content-center mt-5">
+    <div class="col-md-8 text-center">
+        <h1 class="display-4 text-success mb-4">Bem-vindo ao SICFAAE</h1>
+        <p class="lead mb-5">Plataforma de Gestão de Candidaturas para Agentes Eleitorais</p>
+
+        <div class="row">
+            <div class="col-md-6 mb-4">
+                <div class="card shadow h-100 border-success">
+                    <div class="card-body p-5">
+                        <h3>🧑‍🚀 Candidatos</h3>
+                        <p>Deseja fazer parte da equipa? Submeta a sua candidatura aqui.</p>
+                        <ul class="list-unstyled text-start mb-4">
+                            <li>✅ Formadores</li>
+                            <li>✅ Brigadistas</li>
+                            <li>✅ Agentes de Educação Cívica</li>
+                        </ul>
+                        <a href="{% url 'candidaturas:registar_candidatura' %}"
+                            class="btn btn-success btn-lg w-100">Candidatar-se Agora</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6 mb-4">
+                <div class="card shadow h-100 border-secondary">
+                    <div class="card-body p-5">
+                        <h3>🔐 Área Administrativa</h3>
+                        <p>Acesso reservado ao Júri e Administradores do STAE.</p>
+                        <br>
+                        {% if user.is_authenticated %}
+                        <div class="alert alert-info">
+                            <strong>Logado como:</strong> {{ user.username }}
+                        </div>
+                        <a href="{% url 'candidaturas:painel_controlo' %}"
+                            class="btn btn-primary btn-lg w-100 mb-2">Aceder ao Painel</a>
+                        <form action="{% url 'logout' %}" method="post" class="w-100">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-outline-danger btn-sm w-100">Não é você? Sair
+                                (Logout)</button>
+                        </form>
+                        {% else %}
+                        <p class="text-muted mb-4">Necessário credenciais de acesso.</p>
+                        <a href="{% url 'login' %}" class="btn btn-outline-primary btn-lg w-100">Fazer Login</a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            <!-- Card Removido (Redunante) -->
+        </div>
+    </div>
+</div>
+{% endblock %}

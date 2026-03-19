@@ -1,0 +1,197 @@
+{% extends 'formacao/base.html' %}
+
+{% block content %}
+<div class="container-fluid py-4" style="max-width: 680px;">
+    <a href="{% url 'formacao:plano_lista' %}" class="btn btn-light btn-sm border mb-4">
+        <i class="bi bi-arrow-left me-1"></i> Voltar
+    </a>
+    <h2 class="fw-bold mb-1">{% if object %}Editar{% else %}Novo{% endif %} Plano de Formação</h2>
+    <p class="text-secondary mb-4">Cada tipo de agente tem um plano separado por distrito.</p>
+
+    <div class="card border-0 shadow-sm rounded-4">
+        <div class="card-body p-4">
+            <form method="post">
+                {% csrf_token %}
+
+                <div class="row g-3 mb-3">
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Distrito</label>
+                        {{ form.distrito }}
+                        {% if form.distrito.errors %}
+                        <div class="text-danger small mt-1">{{ form.distrito.errors }}</div>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Tipo de Agente</label>
+                        {{ form.tipo }}
+                        {% if form.tipo.errors %}
+                        <div class="text-danger small mt-1">{{ form.tipo.errors }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div id="campo-brigadas" class="mb-3" style="display:none;">
+                    <label class="form-label fw-semibold">
+                        <i class="bi bi-people me-1 text-primary"></i>Nº de Brigadas
+                    </label>
+                    {{ form.num_brigadas }}
+                    <div class="form-text">O sistema calculará: <strong>Brigadas × 3 brigadistas</strong> + margem de
+                        contingência</div>
+                    {% if form.num_brigadas.errors %}
+                    <div class="text-danger small mt-1">{{ form.num_brigadas.errors }}</div>
+                    {% endif %}
+                </div>
+
+                <div id="campo-agentes" class="mb-3" style="display:none;">
+                    <label class="form-label fw-semibold" id="label-agentes">
+                        <i class="bi bi-person-badge me-1 text-warning"></i>Nº de Agentes Previstos
+                    </label>
+                    {{ form.num_agentes_previstos }}
+                    <div class="form-text" id="help-agentes">Número total de agentes a recrutar e formar neste distrito.
+                    </div>
+                    {% if form.num_agentes_previstos.errors %}
+                    <div class="text-danger small mt-1">{{ form.num_agentes_previstos.errors }}</div>
+                    {% endif %}
+                </div>
+
+                <div id="nota-mmv" class="alert alert-warning border-0 rounded-3 mb-3 small" style="display:none;">
+                    <i class="bi bi-clock-history me-1"></i>
+                    <strong>MMV</strong> só são recrutados no <strong>período eleitoral (votação)</strong>, não durante
+                    o recenseamento.
+                    Defina aqui o plano de formação para esse período.
+                </div>
+
+                <div id="plano-preview" class="alert alert-primary border-0 rounded-3 mb-4" style="display:none;">
+                    <h6 class="fw-bold mb-3"><i class="bi bi-calculator me-2"></i>Cálculo Automático</h6>
+                    <div class="row g-3 text-center">
+                        <div class="col-6">
+                            <div class="h4 mb-0 fw-bold text-primary" id="preview-total">—</div>
+                            <small class="text-muted">Agentes a Formar (com margem)</small>
+                        </div>
+                        <div class="col-6">
+                            <div class="h4 mb-0 fw-bold text-success" id="preview-turmas">—</div>
+                            <small class="text-muted">Turmas Necessárias</small>
+                        </div>
+                    </div>
+                    <hr class="my-2">
+                    <small class="text-muted" id="preview-formula">—</small>
+                </div>
+
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Margem de Contingência (%)</label>
+                        {{ form.margem_contingencia }}
+                        <div class="form-text">Ex: 5 = 5% adicional para cobrir desistências</div>
+                        {% if form.margem_contingencia.errors %}
+                        <div class="text-danger small">{{ form.margem_contingencia.errors }}</div>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Candidatos por Turma</label>
+                        {{ form.candidatos_por_turma }}
+                        {% if form.candidatos_por_turma.errors %}
+                        <div class="text-danger small">{{ form.candidatos_por_turma.errors }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                {% if form.non_field_errors %}
+                <div class="alert alert-danger rounded-3 small">
+                    {% for err in form.non_field_errors %}{{ err }}{% endfor %}
+                </div>
+                {% endif %}
+
+                <div class="d-flex gap-2 justify-content-end">
+                    <a href="{% url 'formacao:plano_lista' %}" class="btn btn-outline-secondary">Cancelar</a>
+                    <button type="submit" class="btn btn-warning text-white px-4 shadow-sm">
+                        <i class="bi bi-save me-2"></i>Guardar Plano
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    const BRIGADISTAS_POR_BRIGADA = 3;
+
+    function handleTipoPlanoChange(tipo) {
+        const campoBrigadas = document.getElementById('campo-brigadas');
+        const campoAgentes = document.getElementById('campo-agentes');
+        const notaMMV = document.getElementById('nota-mmv');
+        const labelAgentes = document.getElementById('label-agentes');
+        const helpAgentes = document.getElementById('help-agentes');
+
+        if (tipo === 'BRIGADISTAS') {
+            campoBrigadas.style.display = 'block';
+            campoAgentes.style.display = 'none';
+            notaMMV.style.display = 'none';
+        } else if (tipo === 'MMV') {
+            campoBrigadas.style.display = 'none';
+            campoAgentes.style.display = 'block';
+            notaMMV.style.display = 'block';
+            if (labelAgentes) labelAgentes.innerHTML = '<i class="bi bi-clipboard-check me-1 text-warning"></i>Nº de MMV Previstos';
+            if (helpAgentes) helpAgentes.textContent = 'Número total de Membros de Mesas de Voto a formar neste distrito (período eleitoral).';
+        } else if (tipo === 'AGENTES_EDUCACAO') {
+            campoBrigadas.style.display = 'none';
+            campoAgentes.style.display = 'block';
+            notaMMV.style.display = 'none';
+            if (labelAgentes) labelAgentes.innerHTML = '<i class="bi bi-megaphone me-1 text-success"></i>Nº de Agentes de Educ. Cívica Previstos';
+            if (helpAgentes) helpAgentes.textContent = 'Número total de Agentes de Educação Cívica a formar neste distrito.';
+        } else {
+            campoBrigadas.style.display = 'none';
+            campoAgentes.style.display = 'none';
+            notaMMV.style.display = 'none';
+        }
+        calcularPlano();
+    }
+
+    function calcularPlano() {
+        const tipo = document.getElementById('id_tipo')?.value || document.getElementById('id_tipo_plano')?.value;
+        const margem = parseFloat(document.getElementById('id_margem_contingencia')?.value) || 0;
+        const cap = parseInt(document.getElementById('id_candidatos_por_turma')?.value) || 40;
+        const preview = document.getElementById('plano-preview');
+        let base = 0, formula = '';
+
+        if (tipo === 'BRIGADISTAS') {
+            const brigadas = parseInt(document.getElementById('id_num_brigadas')?.value) || 0;
+            base = brigadas * BRIGADISTAS_POR_BRIGADA;
+            formula = `${brigadas} brigadas × 3 = ${base} base`;
+        } else {
+            const agentes = parseInt(document.getElementById('id_num_agentes_previstos')?.value) || 0;
+            base = agentes;
+            formula = `${agentes} agentes previstos`;
+        }
+
+        if (base <= 0 || !preview) {
+            if (preview) preview.style.display = 'none';
+            return;
+        }
+
+        const total = Math.ceil(base * (1 + margem / 100));
+        const turmas = cap > 0 ? Math.ceil(total / cap) : 0;
+
+        document.getElementById('preview-total').textContent = total;
+        document.getElementById('preview-turmas').textContent = turmas;
+        document.getElementById('preview-formula').textContent =
+            `${formula} → com ${margem}% margem = ${total} a formar → ${total} ÷ ${cap}/turma = ${turmas} turmas`;
+        preview.style.display = 'block';
+    }
+
+    window.addEventListener('DOMContentLoaded', function () {
+        // Ajuste para o ID real do campo 'tipo' gerado pelo Django
+        const sel = document.getElementById('id_tipo') || document.getElementById('id_tipo_plano');
+        if (sel) {
+            handleTipoPlanoChange(sel.value);
+            sel.addEventListener('change', (e) => handleTipoPlanoChange(e.target.value));
+        }
+
+        // Adicionar listeners para recalcular quando os números mudarem
+        const inputs = ['id_num_brigadas', 'id_num_agentes_previstos', 'id_margem_contingencia', 'id_candidatos_por_turma'];
+        inputs.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.addEventListener('input', calcularPlano);
+        });
+    });
+</script>
+{% endblock %}

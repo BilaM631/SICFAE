@@ -1,0 +1,101 @@
+{% extends 'candidaturas/base.html' %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12 d-flex justify-content-between align-items-center">
+        <div>
+            <h2 class="fw-bold text-dark">{{ titulo_pagina }}</h2>
+            <p class="text-secondary mb-2">Crie e gerencie as credenciais de acesso para os níveis inferiores.</p>
+        </div>
+        <div>
+            <a href="{% url 'candidaturas:painel_controlo' %}" class="btn btn-outline-secondary">
+                <i class="me-2">⬅️</i> Voltar ao Painel
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Form Column -->
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white border-0 pt-4 pb-0">
+                <h5 class="fw-bold text-primary">Criar Novo Utilizador</h5>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+
+                    {% for field in form %}
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-secondary">{{ field.label }}</label>
+                        {{ field }}
+                        {% if field.help_text %}
+                        <div class="form-text small">{{ field.help_text }}</div>
+                        {% endif %}
+                        <div class="text-danger small">{{ field.errors }}</div>
+                    </div>
+                    {% endfor %}
+
+                    <div class="d-grid mt-4">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            Criar Utilizador
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- List Column -->
+    <div class="col-md-8">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-white border-0 pt-4 pb-0">
+                <h5 class="fw-bold text-dark">Utilizadores Existentes</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="bg-light">
+                            <tr>
+                                <th>Username</th>
+                                <th>Nível</th>
+                                <th>Área (Prov/Dist)</th>
+                                <th>Data Criação</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for perfil in lista_usuarios %}
+                            <tr>
+                                <td class="fw-bold">{{ perfil.usuario.username }}</td>
+                                <td>
+                                    <span class="badge 
+                                        {% if perfil.nivel == 'PROVINCIAL' %}bg-info text-dark{% endif %}
+                                        {% if perfil.nivel == 'DISTRITAL' %}bg-secondary{% endif %}">
+                                        {{ perfil.get_nivel_display }}
+                                    </span>
+                                </td>
+                                <td>
+                                    {% if perfil.nivel == 'PROVINCIAL' %}
+                                    {{ perfil.provincia.nome }}
+                                    {% elif perfil.nivel == 'DISTRITAL' %}
+                                    {{ perfil.distrito.nome }} ({{ perfil.provincia.nome }})
+                                    {% endif %}
+                                </td>
+                                <td class="text-muted small">{{ perfil.usuario.date_joined|date:"d/m/Y" }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="4" class="text-center py-5 text-muted">
+                                    Nenhum utilizador criado ainda neste nível.
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

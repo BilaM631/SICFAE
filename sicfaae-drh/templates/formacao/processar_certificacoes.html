@@ -1,0 +1,186 @@
+{% extends 'candidaturas/base.html' %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold text-dark">Processar Certificações</h2>
+            <p class="text-muted mb-0">
+                <strong>{{ turma.nome }}</strong> - {{ turma.distrito.nome }}
+            </p>
+        </div>
+        <div>
+            <a href="{% url 'formacao:detalhe_turma' turma.pk %}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left me-2"></i> Voltar
+            </a>
+        </div>
+    </div>
+
+    {% if not turma.concluida %}
+    <div class="alert alert-warning d-flex align-items-center" role="alert">
+        <i class="bi bi-exclamation-triangle fs-4 me-3"></i>
+        <div>
+            <strong>Atenção!</strong> Esta turma ainda não foi marcada como concluída.
+            Conclua a formação primeiro antes de emitir certificações.
+        </div>
+    </div>
+    {% else %}
+
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card border-0 shadow-sm bg-primary text-white">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <h6 class="text-white-50 mb-2">Tipo de Certificação</h6>
+                            <h4 class="mb-0">
+                                {% if tipo_certificacao == 'FORMADOR' %}
+                                <i class="bi bi-mortarboard me-2"></i> Formador Certificado
+                                {% else %}
+                                <i class="bi bi-person-badge me-2"></i> Brigadista Certificado
+                                {% endif %}
+                            </h4>
+                        </div>
+                        <div class="col-md-3">
+                            <h6 class="text-white-50 mb-2">Formandos Aptos</h6>
+                            <h4 class="mb-0">{{ candidatos_aptos|length }}</h4>
+                        </div>
+                        <div class="col-md-3">
+                            <h6 class="text-white-50 mb-2">Presença Mínima</h6>
+                            <h4 class="mb-0">{{ turma.percentual_presenca_minimo }}%</h4>
+                        </div>
+                        <div class="col-md-3">
+                            <h6 class="text-white-50 mb-2">Nota Mínima</h6>
+                            <h4 class="mb-0">{{ turma.nota_minima_aprovacao }}/20</h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <form method="post">
+        {% csrf_token %}
+
+        <div class="card border-0 shadow-sm mb-3">
+            <div class="card-header bg-white py-3">
+                <div class="row align-items-center">
+                    <div class="col-md-6">
+                        <h5 class="mb-0">Formandos Aptos para Certificação</h5>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="row g-2">
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold mb-1">Nota Final (opcional)</label>
+                                <input type="number" class="form-control" name="nota_final" step="0.01" min="0" max="20"
+                                    placeholder="Ex: 15.50">
+                            </div>
+                            <div class="col-md-6 d-flex align-items-end">
+                                <button type="button" class="btn btn-outline-primary w-100" onclick="selecionarTodos()">
+                                    <i class="bi bi-check-all me-1"></i> Selecionar Todos
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="bg-light">
+                        <tr>
+                            <th class="ps-4" style="width: 50px;">
+                                <input type="checkbox" class="form-check-input" id="selectAll"
+                                    onclick="toggleAll(this)">
+                            </th>
+                            <th>Nome do Formando</th>
+                            <th>Código</th>
+                            <th class="text-center">Presença</th>
+                            <th class="text-center">Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in candidatos_aptos %}
+                        <tr>
+                            <td class="ps-4">
+                                <input type="checkbox" class="form-check-input candidato-checkbox" name="candidatos_ids"
+                                    value="{{ item.candidato.id }}">
+                            </td>
+                            <td>
+                                <div class="fw-bold">{{ item.candidato.nome_completo }}</div>
+                            </td>
+                            <td>
+                                <span class="badge bg-secondary bg-opacity-10 text-secondary font-monospace">
+                                    {{ item.candidato.codigo_candidato }}
+                                </span>
+                            </td>
+                            <td class="text-center">
+                                <span
+                                    class="badge rounded-pill {% if item.percentual_presenca >= turma.percentual_presenca_minimo %}bg-success{% else %}bg-warning text-dark{% endif %}">
+                                    {{ item.percentual_presenca }}%
+                                </span>
+                            </td>
+                            <td class="text-center">
+                                <span class="badge bg-info text-dark">
+                                    {{ item.candidato.get_estado_display }}
+                                </span>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="5" class="text-center py-5 text-muted">
+                                <i class="bi bi-award fs-1 d-block mb-3"></i>
+                                Nenhum formando apto para certificação neste momento.
+                                <br>
+                                <small>Verifique se os formandos atingiram a presença mínima de {{
+                                    turma.percentual_presenca_minimo }}%</small>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% if candidatos_aptos %}
+            <div class="card-footer bg-white py-3">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div class="text-muted">
+                        <strong>Total de formandos aptos:</strong> {{ candidatos_aptos|length }}
+                    </div>
+                    <button type="submit" class="btn btn-success btn-lg"
+                        onclick="return confirm('Tem certeza que deseja emitir as certificações para os formandos selecionados?');">
+                        <i class="bi bi-award me-2"></i> Emitir Certificações
+                    </button>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </form>
+
+    <div class="alert alert-info d-flex align-items-start" role="alert">
+        <i class="bi bi-info-circle fs-4 me-3 mt-1"></i>
+        <div>
+            <strong>Informação:</strong>
+            <ul class="mb-0 mt-2">
+                <li>Apenas formandos com presença >= {{ turma.percentual_presenca_minimo }}% podem ser certificados</li>
+                <li>A nota final é opcional e pode ser adicionada posteriormente</li>
+                <li>Após emissão, os certificados podem ser consultados na lista de certificações</li>
+                <li>O estado do formando será automaticamente atualizado após certificação</li>
+            </ul>
+        </div>
+    </div>
+
+    {% endif %}
+</div>
+
+<script>
+    function toggleAll(source) {
+        document.querySelectorAll('.candidato-checkbox').forEach(checkbox => {
+            checkbox.checked = source.checked;
+        });
+    }
+
+    function selecionarTodos() {
+        document.getElementById('selectAll').checked = true;
+        toggleAll(document.getElementById('selectAll'));
+    }
+</script>
+{% endblock %}

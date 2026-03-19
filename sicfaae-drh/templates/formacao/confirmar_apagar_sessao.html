@@ -1,0 +1,54 @@
+{% extends 'candidaturas/base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-danger text-white py-3">
+                    <h5 class="mb-0">
+                        <i class="bi bi-exclamation-triangle me-2"></i> Confirmar Eliminação
+                    </h5>
+                </div>
+                <div class="card-body p-4">
+                    <p class="mb-4">Tem certeza que deseja apagar a seguinte sessão?</p>
+
+                    <div class="alert alert-light border">
+                        <h6 class="fw-bold">{{ object.tema }}</h6>
+                        <p class="mb-2">
+                            <strong>Data:</strong> {{ object.data|date:"d/m/Y" }}<br>
+                            <strong>Horário:</strong> {{ object.hora_inicio|time:"H:i" }} - {{
+                            object.hora_fim|time:"H:i" }}<br>
+                            <strong>Duração:</strong> {{ object.duracao_horas }}h<br>
+                            {% if object.formador %}
+                            <strong>Formador:</strong> {{ object.formador.nome_completo }}
+                            {% endif %}
+                        </p>
+                    </div>
+
+                    <div class="alert alert-warning d-flex align-items-start" role="alert">
+                        <i class="bi bi-exclamation-triangle fs-4 me-3"></i>
+                        <div>
+                            <strong>Atenção!</strong> Esta ação não pode ser desfeita.
+                            Todos os registos de presença desta sessão também serão eliminados.
+                        </div>
+                    </div>
+
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'formacao:gerir_sessoes' object.turma.pk %}"
+                                class="btn btn-outline-secondary">
+                                <i class="bi bi-arrow-left me-2"></i> Cancelar
+                            </a>
+                            <button type="submit" class="btn btn-danger">
+                                <i class="bi bi-trash me-2"></i> Sim, Apagar Sessão
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

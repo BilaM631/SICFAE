@@ -1,0 +1,187 @@
+{% extends 'candidaturas/base.html' %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="card shadow">
+            <div class="card-header bg-white">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0">Detalhes do Candidato</h4>
+                    {% if candidato.codigo_candidato %}
+                    <span class="badge bg-primary fs-5 px-3 py-2">{{ candidato.codigo_candidato }}</span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="card-body">
+
+                <ul class="nav nav-tabs mb-4" id="myTab" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="home-tab" data-bs-toggle="tab" data-bs-target="#home"
+                            type="button" role="tab">Visão Geral</button>
+                    </li>
+                </ul>
+
+                <div class="tab-content" id="myTabContent">
+                    <div class="tab-pane fade show active" id="home" role="tabpanel">
+                        <div class="row mb-3">
+                            <div class="col-md-4 text-center">
+
+                                {% if candidato.foto %}
+                                <div class="ratio ratio-1x1 mb-3">
+                                    <img src="{{ candidato.foto.url }}"
+                                        class="img-fluid rounded shadow-sm object-fit-cover" alt="Foto do Candidato"
+                                        style="object-fit: cover;">
+                                </div>
+                                {% else %}
+                                <div
+                                    class="ratio ratio-1x1 mb-3 bg-light d-flex align-items-center justify-content-center rounded border">
+                                    <span class="text-muted display-4">👤</span>
+                                </div>
+                                <p class="text-muted small">Sem Foto</p>
+                                {% endif %}
+
+                            </div>
+
+                            <div class="col-md-8">
+                                <h5>{{ candidato.nome_completo }}</h5>
+
+                                <p>
+                                    <strong>Vaga:</strong>
+                                    <span class="badge bg-secondary">{{ candidato.vaga.titulo|default:"---" }}</span>
+                                </p>
+
+                                <p><strong>BI:</strong> {{ candidato.numero_bi }}</p>
+                                <p><strong>Telefone:</strong> {{ candidato.numero_telefone }}</p>
+                                {% if candidato.idade %}
+                                <p><strong>Idade:</strong> {{ candidato.idade }} anos</p>
+                                {% endif %}
+                                <p><strong>Localização:</strong> {{ candidato.provincia }}, {{ candidato.distrito }}</p>
+                                <p><strong>Endereço:</strong> {{ candidato.endereco }}</p>
+
+                                <p>
+                                    <strong>Estado:</strong>
+                                    <span class="badge bg-info">{{ candidato.get_estado_display }}</span>
+                                </p>
+                            </div>
+                        </div>
+
+                        <hr>
+
+                        <h5 class="mb-3">Documentos (Uploads)</h5>
+
+                        <div class="list-group mb-4">
+                            {% if candidato.arquivo_cv %}
+                            <a href="{{ candidato.arquivo_cv.url }}" target="_blank"
+                                class="list-group-item list-group-item-action">
+                                📄 Visualizar Curriculum Vitae (CV)
+                            </a>
+                            {% else %}
+                            <div class="list-group-item text-danger">CV em falta</div>
+                            {% endif %}
+
+                            {% if candidato.arquivo_bi %}
+                            <a href="{{ candidato.arquivo_bi.url }}" target="_blank"
+                                class="list-group-item list-group-item-action">
+                                🪪 Visualizar Cópia do BI
+                            </a>
+                            {% else %}
+                            <div class="list-group-item text-danger">BI em falta</div>
+                            {% endif %}
+
+                            {% if candidato.arquivo_certificado %}
+                            <a href="{{ candidato.arquivo_certificado.url }}" target="_blank"
+                                class="list-group-item list-group-item-action">
+                                🎓 Visualizar Certificado
+                            </a>
+                            {% else %}
+                            <div class="list-group-item text-warning">Certificado em falta</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            {% if pode_gerir %}
+                                {% if candidato.estado == 'PENDENTE' %}
+                                <div class="alert alert-info d-flex align-items-center">
+                                    <div class="flex-grow-1">
+                                        <h5 class="alert-heading mb-1">Candidatura Pronta</h5>
+                                        <p class="mb-0">Candidato pronto para a fase de entrevistas.</p>
+                                    </div>
+                                </div>
+                                <div class="d-grid gap-2">
+                                    <a href="{% url 'candidaturas:gerar_pdf' candidato.pk %}" class="btn btn-outline-dark">
+                                        📄 Baixar Ficha do Candidato (PDF)
+                                    </a>
+                                    <a href="{% url 'candidaturas:agendar_entrevista' candidato.pk %}"
+                                        class="btn btn-primary btn-lg">
+                                        📅 Agendar Entrevista
+                                    </a>
+                                </div>
+                                {% endif %}
+
+                                {% if candidato.estado == 'ENTREVISTA_AGENDADA' %}
+                                <div class="alert alert-info">
+                                    <strong>Entrevista Agendada</strong><br>
+                                    Aguardando realização.
+                                    {% if candidato.entrevista_detalhe %}
+                                    <br>Data: {{ candidato.entrevista_detalhe.data_hora }}
+                                    <br>Local: {{ candidato.entrevista_detalhe.local }}
+                                    {% endif %}
+                                    <div class="mt-2">
+                                        <a href="{% url 'candidaturas:gerar_ficha_entrevista' candidato.pk %}"
+                                            target="_blank" class="btn btn-sm btn-outline-dark">
+                                            📄 Imprimir Ficha de Entrevista (PDF)
+                                        </a>
+                                    </div>
+                                </div>
+                                <div class="btn-group w-100">
+                                    <a href="{% url 'candidaturas:agendar_entrevista' candidato.pk %}"
+                                        class="btn btn-outline-secondary">
+                                        ✏️ Reagendar
+                                    </a>
+                                    {% if candidato.entrevista_detalhe %}
+                                    <a href="{% url 'candidaturas:realizar_entrevista' candidato.entrevista_detalhe.pk %}"
+                                        class="btn btn-success">
+                                        ▶️ Realizar/Avaliar
+                                    </a>
+                                    {% endif %}
+                                </div>
+                                {% endif %}
+
+                                {% if candidato.estado == 'ENTREVISTA_APROVADA' %}
+                                <div class="alert alert-success">Candidato Aprovado na Entrevista!</div>
+                                <a href="{% url 'candidaturas:enviar_para_formacao' candidato.pk %}"
+                                    class="btn btn-warning btn-lg w-100">
+                                    🎓 Enviar para Formação
+                                </a>
+                                {% endif %}
+
+                                {% if candidato.estado == 'EM_FORMACAO' %}
+                                <div class="alert alert-warning">
+                                    <strong>⚠️ Em Formação</strong><br>
+                                    O candidato encontra-se atualmente em fase de formação.
+                                </div>
+                                {% endif %}
+
+                                {% if candidato.estado == 'CONTRATADO' %}
+                                <div class="alert alert-success">
+                                    <strong>Processo Finalizado!</strong><br>
+                                    Credenciais enviadas/geradas.
+                                </div>
+                                {% endif %}
+                            {% else %}
+                                <div class="alert alert-warning">
+                                    <i class="me-2">🔒</i>Modo de Visualização: Apenas o nível Distrital pode gerir candidaturas.
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% endblock %}

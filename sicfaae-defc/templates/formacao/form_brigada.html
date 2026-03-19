@@ -1,0 +1,124 @@
+{% extends 'formacao/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white border-0 pt-4 px-4">
+                    <h4 class="fw-bold mb-0">
+                        {% if form.instance.pk %}Editar Brigada{% else %}Nova Brigada{% endif %}
+                    </h4>
+                    <p class="text-muted small">Configure a brigada e selecione os membros certificados.</p>
+                </div>
+                <div class="card-body px-4 pb-4">
+                    <form method="post" id="brigadaForm">
+                        {% csrf_token %}
+                        
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Nome da Brigada</label>
+                            {{ form.nome }}
+                            {% if form.nome.errors %}
+                            <div class="text-danger small">{{ form.nome.errors }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Distrito</label>
+                            {{ form.distrito }}
+                            {% if form.distrito.errors %}
+                            <div class="text-danger small">{{ form.distrito.errors }}</div>
+                            {% endif %}
+                            <div class="form-text small">Ao alterar o distrito, a lista de membros disponíveis será actualizada.</div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label fw-bold d-flex justify-content-between">
+                                Membros Disponíveis
+                                <span class="badge bg-secondary" id="membrosCount">0 candidatos</span>
+                            </label>
+                            {{ form.membros }}
+                            {% if form.membros.errors %}
+                            <div class="text-danger small">{{ form.membros.errors }}</div>
+                            {% endif %}
+                            <div class="form-text small help-text">{{ form.membros.help_text }}</div>
+                        </div>
+
+                        <div class="mb-4">
+                            <div class="form-check form-switch">
+                                {{ form.ativa }}
+                                <label class="form-check-label fw-bold" for="{{ form.ativa.id_for_label }}">Brigada Ativa</label>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-between pt-3 border-top">
+                            <a href="{% url 'formacao:lista_brigadas' %}" class="btn btn-outline-secondary">Cancelar</a>
+                            <button type="submit" class="btn btn-primary px-4">
+                                <i class="bi bi-check-lg me-2"></i> Gravar Brigada
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const distritoSelect = document.getElementById('id_distrito');
+    const membrosSelect = document.getElementById('id_membros');
+    const membrosCount = document.getElementById('membrosCount');
+    const helpText = document.querySelector('.help-text');
+
+    function updateMembros() {
+        const distritoId = distritoSelect.value;
+        if (!distritoId) {
+            membrosSelect.innerHTML = '';
+            membrosCount.innerText = '0 candidatos';
+            helpText.innerText = "Seleccione um distrito para ver os brigadistas disponíveis.";
+            return;
+        }
+
+        helpText.innerText = "A carregar brigadistas certificados...";
+        
+        fetch(`/formacao/api/brigadistas-disponiveis/?distrito_id=${distritoId}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    // Guardar seleções actuais se for edição
+                    const selectedValues = Array.from(membrosSelect.selectedOptions).map(opt => opt.value);
+                    
+                    membrosSelect.innerHTML = '';
+                    data.data.forEach(item => {
+                        const option = document.createElement('option');
+                        option.value = item.id;
+                        option.text = `${item.nome} (${item.codigo})`;
+                        if (selectedValues.includes(item.id.toString())) {
+                            option.selected = true;
+                        }
+                        membrosSelect.appendChild(option);
+                    });
+                    
+                    membrosCount.innerText = `${data.data.length} candidatos encontrados`;
+                    helpText.innerText = "Apenas brigadistas com certificação ativa neste distrito são listados.";
+                }
+            })
+            .catch(error => {
+                console.error('Erro:', error);
+                helpText.innerText = "Erro ao carregar candidatos.";
+            });
+    }
+
+    distritoSelect.addEventListener('change', updateMembros);
+    
+    // Inicializar se tiver distrito (edição)
+    if (distritoSelect.value) {
+        // Se for edição, não queremos limpar o select no início, mas queremos atualizar a contagem
+        const count = membrosSelect.options.length;
+        membrosCount.innerText = `${count} candidatos`;
+    }
+});
+</script>
+{% endblock %}

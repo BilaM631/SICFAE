@@ -1,0 +1,76 @@
+{% extends 'candidaturas/base.html' %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12 d-flex justify-content-between align-items-center bg-white p-3 rounded-3 shadow-sm border-start border-4 border-primary">
+        <div>
+            <h2 class="fw-bold text-dark m-0">Painel do Entrevistador</h2>
+            <p class="text-secondary mb-0">Bem-vindo(a), <strong>{{ entrevistador.nome }}</strong>! A sua vaga alocada é: <span class="badge bg-primary">{{ entrevistador.vaga.titulo }}</span></p>
+        </div>
+        <div>
+            <form action="{% url 'logout' %}" method="post">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-outline-danger">
+                    <i class="bi bi-box-arrow-right me-1"></i>Sair
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="card border-0 shadow-sm">
+    <div class="card-header bg-white py-3 border-bottom">
+        <h5 class="fw-bold mb-0"><i class="bi bi-people-fill text-primary me-2"></i>Candidatos Disponíveis para Entrevista</h5>
+    </div>
+    
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="bg-light">
+                <tr>
+                    <th class="ps-4">Candidato</th>
+                    <th>BI</th>
+                    <th>Estado Atual</th>
+                    <th>Telefone</th>
+                    <th class="text-end pe-4">Ação</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for candidato in candidatos %}
+                {% if candidato.estado == 'DOCS_APROVADOS' or candidato.estado == 'ENTREVISTA_AGENDADA' or candidato.estado == 'ENTREVISTA_APROVADA' or candidato.estado == 'ENTREVISTA_REPROVADA' %}
+                <tr>
+                    <td class="ps-4 fw-bold">{{ candidato.nome_completo }}</td>
+                    <td><span class="text-muted">{{ candidato.numero_bi }}</span></td>
+                    <td>
+                        <span class="badge 
+                            {% if candidato.estado == 'ENTREVISTA_APROVADA' %}bg-success
+                            {% elif candidato.estado == 'ENTREVISTA_REPROVADA' %}bg-danger
+                            {% elif candidato.estado == 'ENTREVISTA_AGENDADA' %}bg-primary
+                            {% else %}bg-info text-dark{% endif %}">
+                            {{ candidato.get_estado_display }}
+                        </span>
+                    </td>
+                    <td>{{ candidato.numero_telefone }}</td>
+                    <td class="text-end pe-4">
+                        {% if candidato.estado == 'ENTREVISTA_APROVADA' or candidato.estado == 'ENTREVISTA_REPROVADA' %}
+                        <button class="btn btn-sm btn-outline-secondary" disabled>Avaliado</button>
+                        {% else %}
+                        <a href="{% url 'candidaturas:avaliar_candidato_vaga' pk=candidato.pk %}" class="btn btn-sm btn-primary px-3 fw-bold">
+                            <i class="bi bi-clipboard2-check me-1"></i> Entrevistar
+                        </a>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endif %}
+                {% empty %}
+                <tr>
+                    <td colspan="5" class="text-center py-5 text-muted">
+                        <i class="bi bi-inbox fs-1 d-block mb-3"></i>
+                        Nenhum candidato aguarda entrevista de momento.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

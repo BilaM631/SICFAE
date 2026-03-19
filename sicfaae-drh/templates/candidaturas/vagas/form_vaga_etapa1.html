@@ -1,0 +1,235 @@
+{% extends 'candidaturas/base.html' %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-center">
+                <div class="step-indicator">
+                    <div class="step active">
+                        <div class="step-number">1</div>
+                        <div class="step-label">Dados Básicos</div>
+                    </div>
+                    <div class="step-line"></div>
+                    <div class="step">
+                        <div class="step-number">2</div>
+                        <div class="step-label">Documentos</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0"><i class="bi bi-1-circle me-2"></i>Nova Vaga - Dados Básicos</h4>
+                </div>
+                <div class="card-body">
+                    {% if messages %}
+                        {% for message in messages %}
+                        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                        {% endfor %}
+                    {% endif %}
+
+                    <form method="post">
+                        {% csrf_token %}
+
+                        <div class="mb-4">
+                            <label for="id_titulo" class="form-label fw-bold">📋 Título da Vaga *</label>
+                            {{ form.titulo }}
+                            {% if form.titulo.errors %}
+                                <div class="text-danger small">{{ form.titulo.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="id_descricao" class="form-label fw-bold">📝 Descrição</label>
+                            {{ form.descricao }}
+                            <small class="text-muted d-block">Descreva as responsabilidades e requisitos da vaga</small>
+                            {% if form.descricao.errors %}
+                                <div class="text-danger small">{{ form.descricao.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <label for="id_data_inicio" class="form-label fw-bold">📅 Data de Início *</label>
+                                {{ form.data_inicio }}
+                                {% if form.data_inicio.errors %}
+                                    <div class="text-danger small">{{ form.data_inicio.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                <label for="id_data_fim" class="form-label fw-bold">📅 Data de Fim *</label>
+                                {{ form.data_fim }}
+                                {% if form.data_fim.errors %}
+                                    <div class="text-danger small">{{ form.data_fim.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" name="ativa" id="id_ativa" 
+                                    {% if form.ativa.value or form.ativa.value == None %}checked{% endif %}>
+                                <label class="form-check-label fw-bold" for="id_ativa">✅ Vaga Ativa</label>
+                                <small class="d-block text-muted">Vagas ativas aparecem no formulário de candidatura</small>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" name="requer_formacao" id="id_requer_formacao" 
+                                    {% if form.requer_formacao.value or form.requer_formacao.value == None %}checked{% endif %}>
+                                <label class="form-check-label fw-bold" for="id_requer_formacao">🎓 Requer Formação no DEFC</label>
+                                <small class="d-block text-muted">Candidatos aprovados serão enviados para formação antes da contratação</small>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="{{ form.nivel_aprovacao.id_for_label }}" class="form-label fw-bold">🏛️ Nível de Aprovação *</label>
+                            {{ form.nivel_aprovacao }}
+                            <small class="text-muted d-block">Define para onde é a vaga (STAE Central, Provincial ou Distrital).</small>
+                            {% if form.nivel_aprovacao.errors %}
+                                <div class="text-danger small">{{ form.nivel_aprovacao.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-4" id="div_provincia" style="display: none;">
+                            <label for="{{ form.provincia.id_for_label }}" class="form-label fw-bold">📍 Província</label>
+                            {{ form.provincia }}
+                            <small class="text-muted d-block mt-1">Deixe em branco se a vaga abranger Todas as Províncias/Distritos.</small>
+                            {% if form.provincia.errors %}
+                                <div class="text-danger small">{{ form.provincia.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-4" id="div_distrito" style="display: none;">
+                            <label for="{{ form.distrito.id_for_label }}" class="form-label fw-bold">🏢 Distrito</label>
+                            {{ form.distrito }}
+                            <small class="text-muted d-block mt-1">Deixe em branco se a vaga abranger Todos os Distritos da Província selecionada.</small>
+                            {% if form.distrito.errors %}
+                                <div class="text-danger small">{{ form.distrito.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="d-flex justify-content-between mt-4">
+                            <a href="{% url 'candidaturas:lista_vagas' %}" class="btn btn-outline-secondary">
+                                <i class="bi bi-arrow-left me-2"></i>Cancelar
+                            </a>
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                Próximo: Documentos <i class="bi bi-arrow-right ms-2"></i>
+                            </button>
+                        </div>
+                    </form>
+                </div> </div> </div> </div> </div> <style>
+    .step-indicator {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .step {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .step-number {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background: #e9ecef;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        font-size: 1.25rem;
+        color: #6c757d;
+        transition: all 0.3s;
+    }
+
+    .step.active .step-number {
+        background: var(--bs-primary);
+        color: white;
+        box-shadow: 0 0 0 4px rgba(13, 110, 253, 0.2);
+    }
+
+    .step-label {
+        font-size: 0.875rem;
+        color: #6c757d;
+        font-weight: 500;
+    }
+
+    .step.active .step-label {
+        color: var(--bs-primary);
+        font-weight: 600;
+    }
+
+    .step-line {
+        width: 120px;
+        height: 3px;
+        background: #e9ecef;
+        transition: all 0.3s;
+    }
+</style>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const nivelSelect = document.getElementById('{{ form.nivel_aprovacao.id_for_label }}');
+    const divProvincia = document.getElementById('div_provincia');
+    const divDistrito = document.getElementById('div_distrito');
+    const provinciaSelect = document.getElementById('{{ form.provincia.id_for_label }}');
+    const distritoSelect = document.getElementById('{{ form.distrito.id_for_label }}');
+
+    function toggleFields() {
+        const nivel = nivelSelect.value;
+        if (nivel === 'CENTRAL') {
+            divProvincia.style.display = 'none';
+            divDistrito.style.display = 'none';
+        } else if (nivel === 'PROVINCIAL') {
+            divProvincia.style.display = 'block';
+            divDistrito.style.display = 'none';
+        } else if (nivel === 'DISTRITAL') {
+            divProvincia.style.display = 'block';
+            divDistrito.style.display = 'block';
+        }
+    }
+
+    // Toggle on load
+    if (nivelSelect) {
+        toggleFields();
+        nivelSelect.addEventListener('change', toggleFields);
+    }
+    
+    // AJAX to get distritos
+    if (provinciaSelect) {
+        provinciaSelect.addEventListener('change', function() {
+            const provId = this.value;
+            if (provId) {
+                // Here we usually fetch from an endpoint. If endpoint does not exist yet, 
+                // the form reload on error will repopulate or we would need a core API.
+                fetch(`/candidaturas/ajax/carregar-distritos/?provincia=${provId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        distritoSelect.innerHTML = '<option value="" selected>---------</option>';
+                        data.forEach(d => {
+                            const opt = document.createElement('option');
+                            opt.value = d.id;
+                            opt.textContent = d.nome;
+                            distritoSelect.appendChild(opt);
+                        });
+                    }).catch(err => console.error("Endpoint não devolveu distritos.", err));
+            } else {
+                distritoSelect.innerHTML = '<option value="" selected>---------</option>';
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

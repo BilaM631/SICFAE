@@ -1,0 +1,242 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SICFAAE - Gestão de Candidaturas</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+
+    <!-- Arquivo CSS Personalizado -->
+    <link rel="stylesheet" href="{% static 'css/custom.css' %}">
+
+
+    {% block extra_css %}{% endblock %}
+</head>
+
+<body class="{% if not user.is_authenticated %}public-layout{% endif %}">
+
+    {% if user.is_authenticated and not hide_sidebar %}
+    <div id="wrapper">
+        <div class="overlay" id="sidebar-overlay"></div>
+        <nav id="sidebar-wrapper">
+            <div class="sidebar-heading">
+                <i class="bi bi-shield-check"></i> SICFAAE
+            </div>
+            <div class="sidebar-menu nav flex-column">
+                <div class="small fw-bold text-uppercase px-4 mb-2 mt-2 text-white-50" style="font-size: 0.75rem;">Menu
+                    Principal</div>
+
+                <a href="{% url 'candidaturas:inicio' %}"
+                    class="nav-link {% if request.resolver_match.url_name == 'inicio' %}active{% endif %}">
+                    <i class="bi bi-house-door"></i> Início
+                </a>
+                <a href="{% url 'candidaturas:painel_controlo' %}"
+                    class="nav-link {% if request.resolver_match.url_name == 'painel_controlo' %}active{% endif %}">
+                    <i class="bi bi-speedometer2"></i> Dashboard
+                </a>
+                <a href="{% url 'candidaturas:lista_verificacao' %}"
+                    class="nav-link {% if request.resolver_match.url_name == 'lista_verificacao' %}active{% endif %}">
+                    <i class="bi bi-people"></i> Lista de Candidatos
+                </a>
+                <a href="{% url 'candidaturas:registar_candidatura_manual' %}"
+                    class="nav-link {% if request.resolver_match.url_name == 'registar_candidatura_manual' %}active{% endif %}">
+                    <i class="bi bi-person-plus"></i> Registo Manual
+                </a>
+                <a href="{% url 'candidaturas:relatorios' %}"
+                    class="nav-link {% if request.resolver_match.url_name == 'relatorios' %}active{% endif %}">
+                    <i class="bi bi-file-earmark-text"></i> Relatórios
+                </a>
+                <a href="#submenuFormacao" data-bs-toggle="collapse"
+                    class="nav-link dropdown-toggle {% if 'formacao' in request.path %}active{% endif %}"
+                    aria-expanded="{% if 'formacao' in request.path %}true{% else %}false{% endif %}">
+                    <i class="bi bi-easel"></i> Formação
+                </a>
+                <div class="collapse {% if 'formacao' in request.path %}show{% endif %}" id="submenuFormacao">
+                    <ul class="nav flex-column ms-3">
+                        <li class="nav-item">
+                            <a href="{% url 'formacao:lista_turmas_formadores' %}"
+                                class="nav-link {% if 'turmas/formadores' in request.path %}text-primary fw-bold{% else %}text-white-50{% endif %} py-1">
+                                <i class="bi bi-mortarboard me-2"></i> Formadores
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{% url 'formacao:lista_turmas_brigadistas' %}"
+                                class="nav-link {% if 'turmas/brigadistas' in request.path %}text-primary fw-bold{% else %}text-white-50{% endif %} py-1">
+                                <i class="bi bi-people me-2"></i> Brigadistas
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{% url 'formacao:lista_locais' %}"
+                                class="nav-link {% if 'locais' in request.path %}text-primary fw-bold{% else %}text-white-50{% endif %} py-1">
+                                <i class="bi bi-geo-alt me-2"></i> Locais
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                {% if user.is_superuser or user.perfil.nivel == 'CENTRAL' or user.perfil.nivel == 'PROVINCIAL' %}
+                <div class="small fw-bold text-uppercase px-4 mb-2 mt-3 text-white-50" style="font-size: 0.75rem;">
+                    Administração</div>
+                <a href="/admin/candidaturas/vaga/" target="_blank" class="nav-link">
+                    <i class="bi bi-briefcase"></i> Gerir Vagas
+                </a>
+                <a href="{% url 'candidaturas:gestao_utilizadores' %}"
+                    class="nav-link {% if request.resolver_match.url_name == 'gestao_utilizadores' %}active{% endif %}">
+                    <i class="bi bi-person-gear"></i> Utilizadores
+                </a>
+
+                {% if user.is_superuser %}
+                <a href="/admin/" target="_blank" class="nav-link">
+                    <i class="bi bi-database-gear"></i> Django Admin
+                </a>
+                {% endif %}
+                {% endif %}
+            </div>
+
+            <div class="sidebar-footer">
+                <div class="d-flex align-items-center mb-2">
+                    <div class="flex-grow-1 text-truncate">
+                        <div class="fw-bold">{{ user.first_name|default:user.username }}</div>
+                        <div class="small text-white-50" style="font-size: 0.8rem;">
+                            {% if user.is_superuser %}
+                            Superuser
+                            {% elif user.perfil.nivel == 'CENTRAL' %}
+                            STAE Central
+                            {% elif user.perfil.nivel == 'PROVINCIAL' %}
+                            STAE {{ user.perfil.provincia.nome }}
+                            {% elif user.perfil.nivel == 'DISTRITAL' %}
+                            STAE {{ user.perfil.distrito.nome }}
+                            {% else %}
+                            Utilizador
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                <form action="{% url 'logout' %}" method="post">
+                    {% csrf_token %}
+                    <button type="submit"
+                        class="btn btn-danger btn-sm w-100 d-flex align-items-center justify-content-center gap-2">
+                        <i class="bi bi-box-arrow-right"></i> Sair
+                    </button>
+                </form>
+            </div>
+        </nav>
+
+        <div id="page-content-wrapper">
+            <nav class="navbar navbar-expand-lg border-bottom sticky-top bg-white">
+                <div class="container-fluid">
+                    <button class="btn btn-outline-secondary d-md-none me-3" id="menu-toggle">
+                        <i class="bi bi-list"></i>
+                    </button>
+                    <h5 class="mb-0 text-secondary fw-bold d-none d-md-block">
+                        {% if user.is_superuser %}
+                        Sistema de Gestão de Candidaturas (Admin)
+                        {% elif user.perfil.nivel == 'CENTRAL' %}
+                        Sistema de Gestão - STAE Central
+                        {% elif user.perfil.nivel == 'PROVINCIAL' %}
+                        Sistema de Gestão - STAE {{ user.perfil.provincia.nome }}
+                        {% elif user.perfil.nivel == 'DISTRITAL' %}
+                        Sistema de Gestão - STAE {{ user.perfil.distrito.nome }}
+                        {% else %}
+                        Sistema de Gestão de Candidaturas
+                        {% endif %}
+                    </h5>
+                    <div class="ms-auto d-flex align-items-center gap-3">
+                        <button class="btn btn-link text-secondary p-0" id="bd-theme-toggle" title="Alternar Tema">
+                            <i id="theme-icon" class="bi bi-moon fs-5"></i>
+                        </button>
+                    </div>
+                </div>
+            </nav>
+            <div class="content-container">
+                <div class="container-fluid">
+                    {% else %}
+                    <nav class="navbar navbar-expand-lg navbar-dark bg-white shadow-sm mb-4 navbar-public">
+                        <div class="container">
+                            <a href="{% url 'candidaturas:inicio' %}" class="navbar-brand d-flex align-items-center">
+                                <h1 class="m-0 text-primary display-5 fw-bold"><i class="bi bi-book me-3"></i>SICFAAE
+                                </h1>
+                            </a>
+                            <div class="navbar-nav ms-auto d-flex flex-row gap-3">
+                                <button class="btn btn-link nav-link px-3 text-dark" id="bd-theme-toggle-public"
+                                    title="Alternar Tema">
+                                    <i id="theme-icon-public" class="bi bi-moon fs-5"></i>
+                                </button>
+                                <a class="nav-link text-primary fw-bold"
+                                    href="{% url 'candidaturas:consulta_publica' %}">
+                                    <i class="bi bi-search"></i> Consultar
+                                </a>
+                                <a class="nav-link text-primary fw-bold" href="{% url 'login' %}">
+                                    <i class="bi bi-box-arrow-in-right"></i> Login Staff
+                                </a>
+                            </div>
+                        </div>
+                    </nav>
+                    <div class="container mb-5">
+                        {% endif %}
+
+                        {% if messages %}
+                        {% for message in messages %}
+                        <div
+                            class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show shadow-sm">
+                            <i class="bi bi-info-circle me-2"></i> {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                        {% endfor %}
+                        {% endif %}
+
+                        {% block content %}{% endblock %}
+
+                        {% if user.is_authenticated %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% else %}
+    </div>
+    {% endif %}
+
+
+
+    {% block modals %}{% endblock %}
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const wrapper = document.getElementById('wrapper');
+        const toggleButton = document.getElementById('menu-toggle');
+        const overlay = document.getElementById('sidebar-overlay');
+        if (toggleButton) toggleButton.addEventListener('click', () => wrapper.classList.toggle('toggled'));
+        if (overlay) overlay.addEventListener('click', () => wrapper.classList.remove('toggled'));
+
+        const themeBtn = document.getElementById('bd-theme-toggle') || document.getElementById('bd-theme-toggle-public');
+        const themeIcon = document.getElementById('theme-icon') || document.getElementById('theme-icon-public');
+        const htmlElement = document.documentElement;
+
+        function setTheme(theme) {
+            htmlElement.setAttribute('data-bs-theme', theme);
+            localStorage.setItem('theme', theme);
+            if (themeIcon) {
+                themeIcon.className = theme === 'dark' ? 'bi bi-sun fs-5' : 'bi bi-moon fs-5';
+                document.querySelectorAll('.bg-white').forEach(el => {
+                    if (theme === 'dark') {
+                        el.classList.replace('bg-white', 'bg-dark');
+                        el.classList.add('border-secondary');
+                    } else {
+                        el.classList.replace('bg-dark', 'bg-white');
+                        el.classList.remove('border-secondary');
+                    }
+                });
+            }
+        }
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        setTheme(savedTheme);
+        if (themeBtn) themeBtn.addEventListener('click', () => setTheme(htmlElement.getAttribute('data-bs-theme') === 'dark' ? 'light' : 'dark'));
+    </script>
+    {% block extra_js %}{% endblock %}
+</body>
+
+</html>

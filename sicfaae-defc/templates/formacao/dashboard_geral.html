@@ -1,0 +1,151 @@
+{% extends 'formacao/base.html' %}
+
+{% block header_title %}Dashboard Geral{% endblock %}
+
+{% block content %}
+<div class="row g-4 mb-4">
+    <!-- Stat Cards -->
+    <div class="col-md-3">
+        <div class="card h-100">
+            <div class="card-body stat-card">
+                <div class="stat-icon bg-primary-soft">
+                    <i class="bi bi-people-fill"></i>
+                </div>
+                <div>
+                    <div class="text-xs text-uppercase fw-bold text-muted mb-1">Total Formandos</div>
+                    <div class="h3 mb-0 fw-bold text-dark">{{ total_formandos }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card h-100">
+            <div class="card-body stat-card">
+                <div class="stat-icon bg-info-soft">
+                    <i class="bi bi-box-seam"></i>
+                </div>
+                <div>
+                    <div class="text-xs text-uppercase fw-bold text-muted mb-1">MMVs</div>
+                    <div class="h3 mb-0 fw-bold text-dark">{{ total_mmv }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card h-100">
+            <div class="card-body stat-card">
+                <div class="stat-icon bg-warning-soft">
+                    <i class="bi bi-megaphone"></i>
+                </div>
+                <div>
+                    <div class="text-xs text-uppercase fw-bold text-muted mb-1">Agentes Cívicos</div>
+                    <div class="h3 mb-0 fw-bold text-dark">{{ total_civicos }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card h-100">
+            <div class="card-body stat-card">
+                <div class="stat-icon bg-success-soft">
+                    <i class="bi bi-person-badge"></i>
+                </div>
+                <div>
+                    <div class="text-xs text-uppercase fw-bold text-muted mb-1">Brigadistas</div>
+                    <div class="h3 mb-0 fw-bold text-dark">{{ total_brigadistas }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4 mb-4">
+    <div class="col-md-3">
+        <div class="card h-100">
+            <div class="card-body stat-card">
+                <div class="stat-icon bg-primary-soft" style="background-color: #e0e7ff; color: #4338ca;">
+                    <i class="bi bi-mortarboard-fill"></i>
+                </div>
+                <div>
+                    <div class="text-xs text-uppercase fw-bold text-muted mb-1">Formadores</div>
+                    <div class="h3 mb-0 fw-bold text-dark">{{ total_formadores }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Tabela de Recentes -->
+<div class="card">
+    <div class="card-header border-0 bg-white py-4 px-4">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h5 class="mb-1">Recém Chegados</h5>
+                <p class="text-sm text-muted mb-0">Últimos candidatos recebidos do DRH</p>
+            </div>
+            <a href="{% url 'formacao:lista_turmas' %}" class="btn btn-sm btn-white">
+                Ver Todas Turmas
+            </a>
+        </div>
+    </div>
+    <div class="table-responsive">
+        <table class="table align-middle">
+            <thead>
+                <tr>
+                    <th class="ps-4">Candidato</th>
+                    <th>Tipo</th>
+                    <th>Origem</th>
+                    <th class="text-end pe-4">Recepção</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for formando in formandos_recentes %}
+                <tr>
+                    <td class="ps-4">
+                        <div class="d-flex align-items-center">
+                            <div class="avatar rounded-circle bg-light text-secondary d-flex align-items-center justify-content-center me-3"
+                                style="width:36px; height:36px; font-size: 0.8rem; font-weight: 700;">
+                                {{ formando.nome_completo.0 }}
+                            </div>
+                            <div>
+                                <div class="font-medium text-dark">{{ formando.nome_completo }}</div>
+                                <div class="text-xs text-muted font-monospace">{{ formando.codigo_candidato }}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        {% if formando.tipo_agente == 'MMV' %}
+                        <span class="badge bg-info-soft">MMV</span>
+                        {% elif formando.tipo_agente == 'AGENTE_CIVICO' %}
+                        <span class="badge bg-warning-soft">Ed. Cívica</span>
+                        {% elif formando.tipo_agente == 'BRIGADISTA' %}
+                        <span class="badge bg-success-soft">Brigadista</span>
+                        {% else %}
+                        <span class="badge bg-primary-soft">Formador</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <div class="text-sm font-medium">{{ formando.distrito.nome }}</div>
+                        <div class="text-xs text-muted">{{ formando.provincia.nome }}</div>
+                    </td>
+                    <td class="text-end pe-4">
+                        <div class="text-sm text-muted">{{ formando.data_recepcao|date:"d/m/Y" }}</div>
+                        <div class="text-xs text-muted">{{ formando.data_recepcao|date:"H:i" }}</div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4" class="text-center py-5 text-muted">
+                        <div class="mb-2"><i class="bi bi-inbox fs-2 opacity-25"></i></div>
+                        Nenhum registro encontrado.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

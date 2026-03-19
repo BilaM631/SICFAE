@@ -1,0 +1,52 @@
+{% extends 'candidaturas/base.html' %}
+
+{% block content %}
+<div class="row justify-content-center mt-5">
+    <div class="col-md-6 col-lg-5">
+        <div class="card shadow-lg border-0 rounded-3">
+            <div class="card-header bg-success text-white text-center p-4"
+                style="background: linear-gradient(135deg, #198754 0%, #146c43 100%);">
+                <div class="fs-1 mb-2">🧑‍🚀</div>
+                <h3 class="fw-bold mb-0">Acesso do Candidato</h3>
+                <p class="opacity-75 mb-0">Consulte o estado da sua candidatura</p>
+            </div>
+            <div class="card-body p-4 p-md-5">
+                <form method="post" class="needs-validation" novalidate>
+                    {% csrf_token %}
+
+                    {% if form.non_field_errors %}
+                    <div class="alert alert-danger border-0 shadow-sm mb-4">
+                        {{ form.non_field_errors.0 }}
+                    </div>
+                    {% endif %}
+
+                    <div class="form-floating mb-3">
+                        <input type="text" name="numero_bi" class="form-control" id="id_numero_bi" placeholder="BI"
+                            required>
+                        <label for="id_numero_bi">Número de BI</label>
+                    </div>
+
+                    <div class="form-floating mb-4">
+                        <input type="text" name="numero_telefone" class="form-control" id="id_numero_telefone"
+                            placeholder="Telefone" required>
+                        <label for="id_numero_telefone">Telefone</label>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-success btn-lg fw-bold">
+                            Entrar
+                        </button>
+                        <a href="{% url 'candidaturas:inicio' %}" class="btn btn-link text-muted text-decoration-none">
+                            Voltar ao Início
+                        </a>
+                    </div>
+                </form>
+            </div>
+            <div class="card-footer bg-light text-center p-3 border-0">
+                <small class="text-muted">Não tem conta? <a href="{% url 'candidaturas:registar_candidatura' %}"
+                        class="fw-bold text-success">Registe-se aqui</a></small>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

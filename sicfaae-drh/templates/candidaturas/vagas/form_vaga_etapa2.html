@@ -1,0 +1,294 @@
+{% extends 'candidaturas/base.html' %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Indicador de Progresso -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-center">
+                <div class="step-indicator">
+                    <div class="step completed">
+                        <div class="step-number"><i class="bi bi-check-lg"></i></div>
+                        <div class="step-label">Dados Básicos</div>
+                    </div>
+                    <div class="step-line completed"></div>
+                    <div class="step active">
+                        <div class="step-number">2</div>
+                        <div class="step-label">Documentos</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Formulário de Documentos -->
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0"><i class="bi bi-2-circle me-2"></i>Documentos Necessários</h4>
+                </div>
+                <div class="card-body">
+                    <!-- Resumo da Etapa 1 -->
+                    <div class="alert alert-info mb-4">
+                        <h6 class="alert-heading mb-2"><i class="bi bi-info-circle me-2"></i>Resumo da Vaga</h6>
+                        <p class="mb-1"><strong>Título:</strong> {{ vaga_dados.titulo }}</p>
+                        <p class="mb-1"><strong>Período:</strong> {{ vaga_dados.data_inicio }} até {{
+                            vaga_dados.data_fim }}</p>
+                        <p class="mb-0">
+                            <strong>Status:</strong>
+                            {% if vaga_dados.ativa %}
+                            <span class="badge bg-success">Ativa</span>
+                            {% else %}
+                            <span class="badge bg-secondary">Inativa</span>
+                            {% endif %}
+                            {% if vaga_dados.requer_formacao %}
+                            <span class="badge bg-info">Com Formação</span>
+                            {% else %}
+                            <span class="badge bg-warning">Contratação Direta</span>
+                            {% endif %}
+                        </p>
+                    </div>
+
+                    <form method="post" id="docsForm">
+                        {% csrf_token %}
+
+                        <p class="text-muted mb-3">
+                            <i class="bi bi-file-earmark-check me-2"></i>
+                            Selecione os documentos que os candidatos devem submeter ao candidatar-se a esta vaga:
+                        </p>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-check mb-3 p-3 border rounded hover-effect">
+                                    {{ form.doc_bi }}
+                                    <label class="form-check-label ms-2" for="id_doc_bi">
+                                        {{ form.doc_bi.label }}
+                                    </label>
+                                </div>
+                                <div class="form-check mb-3 p-3 border rounded hover-effect">
+                                    {{ form.doc_certificado }}
+                                    <label class="form-check-label ms-2" for="id_doc_certificado">
+                                        {{ form.doc_certificado.label }}
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-check mb-3 p-3 border rounded hover-effect">
+                                    {{ form.doc_cv }}
+                                    <label class="form-check-label ms-2" for="id_doc_cv">
+                                        {{ form.doc_cv.label }}
+                                    </label>
+                                </div>
+                                <div class="form-check mb-3 p-3 border rounded hover-effect">
+                                    {{ form.doc_foto }}
+                                    <label class="form-check-label ms-2" for="id_doc_foto">
+                                        {{ form.doc_foto.label }}
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="alert alert-warning mt-3">
+                            <i class="bi bi-exclamation-triangle me-2"></i>
+                            <small>Pelo menos um documento deve ser selecionado para criar a vaga.</small>
+                        </div>
+
+                        <div class="d-flex justify-content-between mt-4">
+                            <a href="{% url 'candidaturas:criar_vaga_etapa1' %}" class="btn btn-outline-secondary">
+                                <i class="bi bi-arrow-left me-2"></i>Voltar
+                            </a>
+                            <button type="submit" class="btn btn-success btn-lg">
+                                <i class="bi bi-check-circle me-2"></i>Criar Vaga
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Preview do Formulário de Candidatura -->
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm sticky-top" style="top: 1rem;">
+                <div class="card-header bg-secondary text-white">
+                    <h5 class="mb-0"><i class="bi bi-eye me-2"></i>Pré-visualização do Formulário</h5>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted small mb-3">
+                        <i class="bi bi-info-circle me-1"></i>
+                        Assim ficará a seção de upload de documentos no formulário de candidatura:
+                    </p>
+
+                    <div id="preview-container" class="p-3 bg-light rounded">
+                        <h6 class="mb-3">📄 Documentos Obrigatórios</h6>
+
+                        <div class="preview-field" data-doc="bi">
+                            <label class="form-label fw-bold">📇 Bilhete de Identidade *</label>
+                            <input type="file" class="form-control" disabled>
+                            <small class="text-muted">Formato: PDF, JPG ou PNG (máx. 5MB)</small>
+                        </div>
+
+                        <div class="preview-field" data-doc="certificado">
+                            <label class="form-label fw-bold">🎓 Certificado de Habilitações *</label>
+                            <input type="file" class="form-control" disabled>
+                            <small class="text-muted">Formato: PDF, JPG ou PNG (máx. 5MB)</small>
+                        </div>
+
+                        <div class="preview-field" data-doc="cv">
+                            <label class="form-label fw-bold">📋 Curriculum Vitae *</label>
+                            <input type="file" class="form-control" disabled>
+                            <small class="text-muted">Formato: PDF, JPG ou PNG (máx. 5MB)</small>
+                        </div>
+
+                        <div class="preview-field" data-doc="foto">
+                            <label class="form-label fw-bold">📸 Fotografia *</label>
+                            <input type="file" class="form-control" disabled>
+                            <small class="text-muted">Formato: JPG ou PNG (máx. 2MB)</small>
+                        </div>
+
+                        <div id="no-docs-message" class="alert alert-warning mt-3" style="display: none;">
+                            <i class="bi bi-exclamation-triangle me-2"></i>
+                            Nenhum documento selecionado
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Atualização dinâmica do preview
+    document.addEventListener('DOMContentLoaded', function () {
+        const checkboxes = document.querySelectorAll('.doc-checkbox');
+        const previewFields = document.querySelectorAll('.preview-field');
+        const noDocsMessage = document.getElementById('no-docs-message');
+
+        function updatePreview() {
+            let anyChecked = false;
+
+            checkboxes.forEach(checkbox => {
+                const docType = checkbox.id.replace('id_doc_', '');
+                const previewField = document.querySelector(`.preview-field[data-doc="${docType}"]`);
+
+                if (checkbox.checked) {
+                    previewField.style.display = 'block';
+                    previewField.style.opacity = '1';
+                    previewField.style.transform = 'translateX(0)';
+                    anyChecked = true;
+                } else {
+                    previewField.style.opacity = '0.3';
+                    previewField.style.transform = 'translateX(-10px)';
+                    setTimeout(() => {
+                        if (!checkbox.checked) {
+                            previewField.style.display = 'none';
+                        }
+                    }, 300);
+                }
+            });
+
+            // Mostrar/ocultar mensagem de "nenhum documento"
+            noDocsMessage.style.display = anyChecked ? 'none' : 'block';
+        }
+
+        // Adicionar event listeners
+        checkboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', updatePreview);
+        });
+
+        // Trigger inicial
+        updatePreview();
+    });
+</script>
+
+<style>
+    .step-indicator {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .step {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .step-number {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background: #e9ecef;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        font-size: 1.25rem;
+        color: #6c757d;
+        transition: all 0.3s;
+    }
+
+    .step.active .step-number {
+        background: var(--bs-primary);
+        color: white;
+        box-shadow: 0 0 0 4px rgba(13, 110, 253, 0.2);
+    }
+
+    .step.completed .step-number {
+        background: var(--bs-success);
+        color: white;
+    }
+
+    .step-label {
+        font-size: 0.875rem;
+        color: #6c757d;
+        font-weight: 500;
+    }
+
+    .step.active .step-label,
+    .step.completed .step-label {
+        color: var(--bs-primary);
+        font-weight: 600;
+    }
+
+    .step-line {
+        width: 120px;
+        height: 3px;
+        background: #e9ecef;
+        transition: all 0.3s;
+    }
+
+    .step-line.completed {
+        background: var(--bs-success);
+    }
+
+    .preview-field {
+        margin-bottom: 1.5rem;
+        padding: 1rem;
+        background: white;
+        border-radius: 0.5rem;
+        border: 1px solid #dee2e6;
+        transition: all 0.3s ease;
+    }
+
+    .preview-field label {
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+    }
+
+    .hover-effect {
+        transition: all 0.2s;
+        cursor: pointer;
+    }
+
+    .hover-effect:hover {
+        background-color: #f8f9fa;
+        border-color: var(--bs-primary) !important;
+    }
+
+    .form-check-input:checked+.form-check-label {
+        color: var(--bs-primary);
+    }
+</style>
+{% endblock %}

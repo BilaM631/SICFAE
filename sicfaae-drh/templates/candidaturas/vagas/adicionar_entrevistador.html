@@ -1,0 +1,47 @@
+{% extends 'candidaturas/base.html' %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <a href="{% url 'candidaturas:detalhe_vaga' vaga.pk %}" class="btn btn-link text-decoration-none p-0 mb-3">
+            <i class="bi bi-arrow-left me-1"></i> Voltar à Vaga
+        </a>
+    </div>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body p-4">
+                <div class="text-center mb-4">
+                    <i class="bi bi-person-badge fs-1 text-primary"></i>
+                    <h4 class="fw-bold mt-2">Registar Entrevistador</h4>
+                    <p class="text-muted mb-0">Para a vaga: <strong>{{ vaga.titulo }}</strong></p>
+                </div>
+
+                <form method="post">
+                    {% csrf_token %}
+
+                    {% if form.errors %}
+                    <div class="alert alert-danger">
+                        Corrija os erros abaixo.
+                    </div>
+                    {% endif %}
+
+                    <div class="mb-4">
+                        <label class="form-label text-muted small">Nome Completo do Entrevistador</label>
+                        {{ form.nome }}
+                        <div class="form-text mt-2"><i class="bi bi-info-circle me-1"></i>Ao guardar, o sistema irá gerar automaticamente um <strong>Código de Acesso</strong> para este entrevistador fazer login.</div>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="bi bi-save me-2"></i>Gerar Acesso e Registar
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

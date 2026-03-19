@@ -38,7 +38,6 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'candidaturas',
     'simple_history',
 ]
 
@@ -126,9 +125,8 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
-# Login Redirects
-LOGIN_REDIRECT_URL = '/candidaturas/dispatch/' # Routes to Admin vs Dashboard
-LOGOUT_REDIRECT_URL = '/candidaturas/'
+# Login Redirects (configured in individual apps: sicfaae-drh and sicfaae-defc)
+# LOGIN_REDIRECT_URL and LOGOUT_REDIRECT_URL should be set in each app's settings
 
 # Security: Expire session when browser closes
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True

@@ -1,0 +1,113 @@
+{% extends 'candidaturas/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="row min-vh-100 align-items-center justify-content-center">
+    <div class="col-md-6 col-lg-5">
+        <div class="card border-0 shadow-lg rounded-4 auth-card overflow-hidden">
+            <div class="card-header bg-white border-0 text-center pt-4 pb-0">
+                <div class="auth-icon mb-3">
+                    <div class="icon-circle bg-success bg-opacity-10 text-success mx-auto">
+                        <i class="fas fa-bullhorn fs-3"></i>
+                    </div>
+                </div>
+                <h4 class="fw-bold text-dark mb-1">Abrir Concurso</h4>
+                <p class="text-muted small">Vaga: <strong>{{ vaga.titulo }}</strong></p>
+            </div>
+            
+            <div class="card-body p-4 p-sm-5 pt-3">
+                
+                <div class="alert alert-warning small mb-4">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    Ao abrir o concurso, será gerado o <strong>Edital Oficial</strong> em PDF. Esta ação não poderá ser desfeita e o documento ficará disponível para os candidatos.
+                </div>
+
+                <form method="post" action="" novalidate>
+                    {% csrf_token %}
+                    
+                    {% if form.non_field_errors %}
+                        <div class="alert alert-danger bg-danger bg-opacity-10 border-0 text-danger rounded-3 py-2 px-3 mb-4">
+                            <ul class="mb-0 list-unstyled small">
+                                {% for error in form.non_field_errors %}
+                                    <li><i class="fas fa-exclamation-circle me-1"></i>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    {% endif %}
+
+                    {% for field in form %}
+                    <div class="mb-4">
+                        <label for="{{ field.id_for_label }}" class="form-label small fw-bold text-secondary mb-1">
+                            {{ field.label }}
+                        </label>
+                        <div class="input-group input-group-lg auth-input-group {% if field.errors %}is-invalid{% endif %}">
+                            <span class="input-group-text bg-light border-0 text-muted">
+                                <i class="fas fa-users"></i>
+                            </span>
+                            {{ field }}
+                        </div>
+                        {% if field.help_text %}
+                            <div class="form-text small mt-1"><i class="fas fa-info-circle me-1"></i>{{ field.help_text }}</div>
+                        {% endif %}
+                        {% if field.errors %}
+                            <div class="invalid-feedback d-block mt-1">
+                                {% for error in field.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+
+                    <div class="d-grid gap-2 mt-4">
+                        <button type="submit" class="btn btn-primary btn-lg rounded-pill fw-bold shadow-sm auth-btn">
+                            <i class="fas fa-file-signature me-2"></i> Gerar Edital e Abrir Concurso
+                        </button>
+                        <a href="{% url 'candidaturas:detalhe_vaga' vaga.pk %}" class="btn btn-light btn-lg rounded-pill fw-bold text-secondary">
+                            Cancelar
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .auth-card {
+        transition: all 0.3s ease;
+    }
+    .auth-card:hover {
+        transform: translateY(-5px);
+    }
+    .icon-circle {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 20px;
+    }
+    .auth-input-group {
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+    }
+    .auth-input-group .form-control {
+        border-left: none;
+    }
+    .auth-input-group .form-control:focus {
+        box-shadow: none;
+        background-color: #fff !important;
+    }
+    .auth-btn {
+        transition: all 0.3s ease;
+        padding: 12px 20px;
+    }
+    .auth-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(13, 110, 253, 0.3) !important;
+    }
+</style>
+{% endblock %}

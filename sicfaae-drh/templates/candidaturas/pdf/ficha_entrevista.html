@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="pt">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Ficha de Entrevista - {{ candidato.nome_completo }}</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 2cm;
+
+            @frame footer_frame {
+                -pdf-frame-content: footerContent;
+                bottom: 1cm;
+                margin-left: 2cm;
+                margin-right: 2cm;
+                height: 1cm;
+            }
+        }
+
+        body {
+            font-family: Helvetica, Arial, sans-serif;
+            font-size: 11pt;
+            color: #333;
+        }
+
+        .header {
+            text-align: center;
+            border-bottom: 2px solid #000;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        .logo {
+            font-size: 18pt;
+            font-weight: bold;
+        }
+
+        .sub-header {
+            font-size: 14pt;
+            margin-top: 5px;
+        }
+
+        .section-title {
+            background-color: #eee;
+            padding: 5px;
+            font-weight: bold;
+            margin-top: 20px;
+            border-bottom: 1px solid #ccc;
+        }
+
+        .info-row {
+            margin-bottom: 8px;
+        }
+
+        .label {
+            font-weight: bold;
+            display: inline-block;
+            width: 150px;
+        }
+
+        .field-box {
+            border: 1px solid #999;
+            height: 100px;
+            margin-top: 5px;
+            margin-bottom: 15px;
+        }
+
+        .score-box {
+            border: 1px solid #999;
+            width: 100px;
+            height: 30px;
+            display: inline-block;
+            vertical-align: middle;
+            margin-left: 10px;
+        }
+
+        .criteria-row {
+            margin-bottom: 15px;
+            border-bottom: 1px dotted #ccc;
+            padding-bottom: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="header">
+        <div class="logo">REPÚBLICA DE MOÇAMBIQUE</div>
+        <div class="sub-header">SECRETARIADO TÉCNICO DE ADMINISTRAÇÃO ELEITORAL</div>
+        <div style="margin-top: 10px;">FICHA DE AVALIAÇÃO DE ENTREVISTA</div>
+    </div>
+
+    <div class="section-title">I. DADOS DO CANDIDATO</div>
+    <div class="info-row">
+        <span class="label">Nome Completo:</span> {{ candidato.nome_completo }}
+    </div>
+    <div class="info-row">
+        <span class="label">Vaga:</span> {{ candidato.vaga.titulo }}
+    </div>
+    <div class="info-row">
+        <span class="label">Código:</span> {{ candidato.codigo_candidato|default:"---" }}
+    </div>
+    <div class="info-row">
+        <span class="label">BI:</span> {{ candidato.numero_bi }}
+    </div>
+
+    <!-- Se a entrevista já estiver agendada/realizada (dados do objeto Entrevista) -->
+    {% if candidato.entrevista_detalhe %}
+    <div class="section-title">II. DADOS DA ENTREVISTA</div>
+    <div class="info-row">
+        <span class="label">Data/Hora:</span> {{ candidato.entrevista_detalhe.data_hora|date:"d/m/Y H:i" }}
+    </div>
+    <div class="info-row">
+        <span class="label">Local:</span> {{ candidato.entrevista_detalhe.local }}
+    </div>
+    {% endif %}
+
+    <div class="section-title">III. AVALIAÇÃO (Preenchimento pelo Júri)</div>
+
+    <div class="criteria-row">
+        <strong>1. Conhecimento Técnico / Competência (0-20 valores)</strong><br>
+        <small>Avalie o domínio do candidato sobre a área de atuação.</small>
+        <div style="text-align: right;">Nota: <div class="score-box"></div>
+        </div>
+    </div>
+
+    <div class="criteria-row">
+        <strong>2. Comunicação e Expressão (0-20 valores)</strong><br>
+        <small>Clareza, objetividade e fluência verbal.</small>
+        <div style="text-align: right;">Nota: <div class="score-box"></div>
+        </div>
+    </div>
+
+    <div class="criteria-row">
+        <strong>3. Experiência Profissional (0-20 valores)</strong><br>
+        <small>Relevância da experiência anterior para a função.</small>
+        <div style="text-align: right;">Nota: <div class="score-box"></div>
+        </div>
+    </div>
+
+    <div class="section-title">IV. OBSERVAÇÕES FINAIS</div>
+    <div class="field-box"></div>
+
+    <div class="section-title">V. DECISÃO FINAL</div>
+    <div style="margin-top: 15px;">
+        <span style="border: 1px solid #000; padding: 5px 20px; margin-right: 20px;">( ) APROVADO</span>
+        <span style="border: 1px solid #000; padding: 5px 20px;">( ) REPROVADO</span>
+    </div>
+
+    <div style="margin-top: 50px; text-align: center;">
+        __________________________________________<br>
+        O Entrevistador
+    </div>
+
+    <div id="footerContent">
+        Página <pdf:pagenumber> de <pdf:pagecount>
+    </div>
+</body>
+
+</html>

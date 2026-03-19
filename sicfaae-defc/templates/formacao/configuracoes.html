@@ -1,0 +1,56 @@
+{% extends 'formacao/base.html' %}
+
+{% block content %}
+<div class="container-fluid py-4" style="max-width: 680px;">
+    <!-- Header -->
+    <div class="mb-4">
+        <h2 class="fw-bold text-dark mb-1"><i class="bi bi-gear-fill text-primary me-2"></i>Configurações do STAE</h2>
+        <p class="text-secondary mb-0">
+            Defina as configurações globais que afetam o funcionamento de todo o sistema.
+        </p>
+    </div>
+
+    <div class="card border-0 shadow-sm rounded-4">
+        <div class="card-body p-4">
+            <h5 class="fw-bold mb-3 border-bottom pb-2">Período Eleitoral Ativo</h5>
+            <p class="small text-muted mb-4">
+                O período eleitoral ativo determina os tipos de agentes que podem ser recrutados e formados pelas
+                delegações distritais.
+                <br>Por exemplo, durante o <strong>Recenseamento</strong> não fará sentido planear turmas para
+                <strong>Membros de Mesa de Voto (MMV)</strong>.
+            </p>
+
+            <form method="post">
+                {% csrf_token %}
+
+                <div class="mb-4">
+                    <label class="form-label fw-semibold">Fase Atual do Ciclo Eleitoral</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-light border-end-0">
+                            <i class="bi bi-calendar-event text-primary"></i>
+                        </span>
+                        {{ form.periodo_ativo }}
+                    </div>
+                    {% if form.periodo_ativo.errors %}
+                    <div class="text-danger small mt-1">
+                        {{ form.periodo_ativo.errors }}
+                    </div>
+                    {% endif %}
+                </div>
+
+                {% if form.non_field_errors %}
+                <div class="alert alert-danger rounded-3 small">
+                    {% for err in form.non_field_errors %}{{ err }}{% endfor %}
+                </div>
+                {% endif %}
+
+                <div class="d-flex justify-content-end mt-4 pt-3 border-top">
+                    <button type="submit" class="btn btn-primary px-4 shadow-sm">
+                        <i class="bi bi-save2 me-2"></i>Guardar Configurações
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

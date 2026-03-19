@@ -1,0 +1,241 @@
+{% extends 'formacao/base.html' %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Header -->
+    <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center mb-4 gap-3">
+        <div>
+            <div class="d-flex align-items-center gap-3 mb-1">
+                <h2 class="fw-bold text-dark mb-0">Plano de Formação</h2>
+                <span class="badge bg-primary fs-6">{{ configuracao_sistema.get_periodo_ativo_display }}</span>
+            </div>
+            <p class="text-secondary mb-0">
+                A formar apenas os tipos de agentes autorizados durante o
+                <strong>{{ configuracao_sistema.get_periodo_ativo_display }}</strong>.
+            </p>
+        </div>
+        <a href="{% url 'formacao:plano_criar' %}" class="btn btn-warning text-white shadow-sm">
+            <i class="bi bi-plus-lg me-2"></i> Novo Plano
+        </a>
+    </div>
+
+    <!-- Nota explicativa -->
+    <div class="alert alert-info border-0 rounded-4 mb-4 d-flex align-items-start gap-3">
+        <i class="bi bi-info-circle-fill fs-5 text-info flex-shrink-0 mt-1"></i>
+        <div>
+            <strong>Regras de Cálculo por Tipo:</strong>
+            <ul class="mb-0 mt-1">
+                <li><strong>Brigadistas:</strong> Brigadas × 3 × (1 + Margem%) ÷ Candidatos/Turma</li>
+                <li><strong>MMV:</strong> Só recrutados no período eleitoral. Introduz o nº directo de agentes
+                    previstos.</li>
+                <li><strong>Agentes de Educação Cívica:</strong> Introduz o nº directo de agentes previstos.</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Accordion por Província -->
+    <div class="accordion formacao-accordion" id="accordionProvincias">
+        {% for pd in provincias_data %}
+        <div class="accordion-item border-0 shadow-sm rounded-4 mb-3 overflow-hidden bg-white">
+            <h2 class="accordion-header" id="headingProv-{{ pd.provincia.id }}">
+                <button class="accordion-button {% if not forloop.first %}collapsed{% endif %} py-3" type="button"
+                    data-bs-toggle="collapse" data-bs-target="#collapseProv-{{ pd.provincia.id }}"
+                    aria-expanded="{% if forloop.first %}true{% else %}false{% endif %}"
+                    aria-controls="collapseProv-{{ pd.provincia.id }}">
+                    <div class="d-flex justify-content-between align-items-center w-100 pe-3">
+                        <div class="d-flex align-items-center gap-2">
+                            <i class="bi bi-map text-primary fs-5"></i>
+                            <span class="fw-bold fs-5">{{ pd.provincia.nome }}</span>
+                        </div>
+                        <div class="d-flex align-items-center gap-3">
+                            {% if pd.todos_submetidos and pd.tem_planos_criados %}
+                            <span
+                                class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-3 py-2">
+                                <i class="bi bi-check-circle me-1"></i> Submetido aos RH
+                            </span>
+                            {% else %}
+                            <span
+                                class="badge bg-secondary-subtle text-secondary border border-secondary-subtle rounded-pill px-3 py-2">
+                                <i class="bi bi-pencil me-1"></i> Em Rascunho
+                            </span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </button>
+            </h2>
+            <div id="collapseProv-{{ pd.provincia.id }}"
+                class="accordion-collapse collapse {% if forloop.first %}show{% endif %}"
+                aria-labelledby="headingProv-{{ pd.provincia.id }}" data-bs-parent="#accordionProvincias">
+                <div class="accordion-body p-0">
+
+                    <!-- Header da Tabela (Planos Criados) -->
+                    {% if pd.planos %}
+                    <div
+                        class="bg-light px-4 py-3 border-bottom d-none d-md-flex row g-0 fw-bold text-uppercase small text-muted">
+                        <div class="col-2">Distrito</div>
+                        <div class="col-2">Tipo de Agente</div>
+                        <div class="col-1 text-center">Brigadas / Agentes</div>
+                        <div class="col-1 text-center">Margem %</div>
+                        <div class="col-2 text-center">Total a Formar</div>
+                        <div class="col-1 text-center">Turmas Nec.</div>
+                        <div class="col-1 text-center">Criadas</div>
+                        <div class="col-1 text-center">Estado da Form.</div>
+                        <div class="col-1 text-end">Ações</div>
+                    </div>
+
+                    <div class="list-group list-group-flush mb-4">
+                        {% for plano in pd.planos %}
+                        {% with nec=plano.num_turmas_necessarias cri=plano.turmas_criadas %}
+                        <div class="list-group-item p-3 border-0 border-bottom">
+                            <div class="row g-2 align-items-center">
+                                <div class="col-md-2 fw-semibold">{{ plano.distrito.nome }}</div>
+                                <div class="col-md-2">
+                                    {% if plano.tipo == 'BRIGADISTAS' %}
+                                    <span
+                                        class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill px-3">
+                                        <i class="bi bi-people me-1"></i>Brigadistas
+                                    </span>
+                                    {% elif plano.tipo == 'MMV' %}
+                                    <span
+                                        class="badge bg-warning-subtle text-warning border border-warning-subtle rounded-pill px-3">
+                                        <i class="bi bi-clipboard-check me-1"></i>MMV
+                                    </span>
+                                    {% else %}
+                                    <span
+                                        class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-3">
+                                        <i class="bi bi-megaphone me-1"></i>Educ. Cívica
+                                    </span>
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-1 text-center">
+                                    {% if plano.tipo == 'BRIGADISTAS' %}
+                                    <span title="{{ plano.num_brigadas }} brigadas">{{ plano.num_brigadas }}
+                                        brig.</span>
+                                    {% else %}
+                                    <span>{{ plano.num_agentes_previstos }}</span>
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-1 text-center">
+                                    <span class="badge bg-secondary-subtle text-secondary border rounded-pill">
+                                        {{ plano.margem_contingencia }}%
+                                    </span>
+                                </div>
+                                <div class="col-md-2 text-center">
+                                    <span class="fw-bold">{{ plano.total_com_contingencia }}</span>
+                                    <span class="text-muted small d-block">base: {{ plano.total_base }}</span>
+                                </div>
+                                <div class="col-md-1 text-center fw-bold">{{ nec }}</div>
+                                <div
+                                    class="col-md-1 text-center fw-bold {% if cri >= nec %}text-success{% else %}text-danger{% endif %}">
+                                    {{ cri }}</div>
+                                <div class="col-md-1 text-center">
+                                    {% if cri >= nec %}
+                                    <span
+                                        class="badge bg-success-subtle text-success border border-success-subtle rounded-pill"><i
+                                            class="bi bi-check-circle me-1"></i>Ok</span>
+                                    {% else %}
+                                    <span
+                                        class="badge bg-danger-subtle text-danger border border-danger-subtle rounded-pill"><i
+                                            class="bi bi-exclamation-triangle me-1"></i>Insuf.</span>
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-1 text-end">
+                                    <a href="{% url 'formacao:plano_editar' plano.pk %}"
+                                        class="btn btn-light btn-sm shadow-sm" title="Editar Plano"><i
+                                            class="bi bi-pencil"></i></a>
+                                </div>
+                            </div>
+                            <!-- Barra de progresso -->
+                            <div class="mt-2 px-1">
+                                {% if nec > 0 %}
+                                {% widthratio cri nec 100 as pct %}
+                                {% if cri >= nec %}
+                                <div class="progress" style="height:5px; border-radius:4px;">
+                                    <div class="progress-bar bg-success" style="width: 100%;"></div>
+                                </div>
+                                {% else %}
+                                <div class="progress" style="height:5px; border-radius:4px;">
+                                    <div class="progress-bar bg-warning" style="width: {{ pct }}%;"></div>
+                                </div>
+                                {% endif %}
+                                {% endif %}
+                                <small class="text-muted">{{ cri }}/{{ nec }} turmas de {{ plano.get_tipo_display }}
+                                    criadas</small>
+                            </div>
+                        </div>
+                        {% endwith %}
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="text-center py-4 bg-light">
+                        <i class="bi bi-journal-x text-muted fs-2"></i>
+                        <p class="text-muted mt-2 mb-0">Nenhum plano registado nesta província.</p>
+                    </div>
+                    {% endif %}
+
+                    <!-- Distritos/Tipos sem Plano para esta Província -->
+                    {% if pd.pendentes %}
+                    <div class="px-4 pb-3">
+                        <div class="card border-0 border-warning shadow-none bg-warning bg-opacity-10 rounded-4">
+                            <div class="card-header bg-transparent border-0 pt-3 pb-2">
+                                <h6 class="mb-0 fw-bold text-warning">
+                                    <i class="bi bi-exclamation-triangle me-2"></i> Planos por Criar
+                                </h6>
+                            </div>
+                            <style>
+                                .hover-card-plan:hover {
+                                    background-color: rgba(255, 193, 7, 0.1) !important;
+                                    border-color: rgba(255, 193, 7, 0.5) !important;
+                                    transform: translateY(-1px);
+                                }
+
+                                .hover-card-plan {
+                                    transition: all 0.2s ease;
+                                }
+                            </style>
+                            <div class="card-body pt-0 pb-3">
+                                <div class="row g-2">
+                                    {% for item in pd.pendentes %}
+                                    <div class="col-12 col-md-6 col-lg-4 col-xl-3">
+                                        <a href="{% url 'formacao:plano_criar' %}?distrito={{ item.distrito.pk }}&tipo={{ item.tipo }}"
+                                            class="text-decoration-none d-block h-100">
+                                            <div
+                                                class="border border-warning border-opacity-25 rounded-3 p-2 d-flex justify-content-between align-items-center bg-white shadow-sm h-100 hover-card-plan">
+                                                <div class="d-flex align-items-center flex-grow-1 overflow-hidden me-2">
+                                                    <span class="fw-bold text-dark text-truncate d-inline-block me-2"
+                                                        style="max-width: 90px;" title="{{ item.distrito.nome }}">
+                                                        {{ item.distrito.nome }}
+                                                    </span>
+                                                    <span
+                                                        class="badge {% if item.tipo == 'BRIGADISTAS' %}bg-primary-subtle text-primary{% elif item.tipo == 'MMV' %}bg-warning-subtle text-warning{% else %}bg-success-subtle text-success{% endif %} rounded-pill text-truncate"
+                                                        style="font-size: 0.70rem; max-width: 100px;"
+                                                        title="{{ item.tipo_label }}">
+                                                        {{ item.tipo_label }}
+                                                    </span>
+                                                </div>
+                                                <div class="text-warning flex-shrink-0 d-flex align-items-center justify-content-center"
+                                                    style="width: 24px; height: 24px; border-radius: 50%; background-color: rgba(255,193,7,0.15);">
+                                                    <i class="bi bi-plus fw-bold"></i>
+                                                </div>
+                                            </div>
+                                        </a>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="text-center py-5">
+            <i class="bi bi-clipboard2-x text-muted fs-1"></i>
+            <h5 class="text-muted mt-3">Nenhum dado disponível.</h5>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
